@@ -7,14 +7,14 @@
 
 import Foundation
 
-class BaseLogger {
-    func printLog(_ value: String?) {
+public class BaseLogger {
+    public func printLog(_ value: String?) {
         print("[DEBUG] \(String(describing: type(of: self))): \(value ?? "Empty Log!")")
     }
 }
 
-class BaseLoggerNSObject: NSObject {
-    func printLog(_ value: String?) {
+public class BaseLoggerNSObject: NSObject {
+    public func printLog(_ value: String?) {
         print("[DEBUG] \(String(describing: type(of: self))): \(value ?? "Empty Log!")")
     }
 }

@@ -7,12 +7,11 @@
 
 import Foundation
 
-extension UserDefaults {
+public extension UserDefaults {
     enum Key: String {
         case firstOpen
         case isPremium
         case reviewCount
-        case voiceLanguage
     }
 
     var didFirstOpen: Bool {
@@ -38,13 +37,5 @@ extension UserDefaults {
 
     func setIsPremium(isPremium: Bool = true) {
         UserDefaults.standard.set(isPremium, forKey: Key.isPremium.rawValue)
-    }
-
-    var voiceLanguage: String {
-        UserDefaults.standard.string(forKey: Key.voiceLanguage.rawValue) ?? StoryVoiceLanguages.english.rawValue
-    }
-
-    func setVoiceLanguage(lang: StoryVoiceLanguages) {
-        UserDefaults.standard.set(lang.rawValue, forKey: Key.voiceLanguage.rawValue)
     }
 }

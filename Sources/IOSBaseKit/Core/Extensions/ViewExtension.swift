@@ -10,7 +10,7 @@ import UIKit
 
 // MARK: Theme & Size
 
-extension View {
+public extension View {
     func getRootViewCtr() -> UIViewController? {
         UIApplication.shared.firstKeyWindow?.rootViewController
     }
@@ -40,7 +40,7 @@ extension View {
 
 // MARK: Open Ads
 
-extension View {
+public extension View {
     func showOpenAdOnAppBecomeActive() -> some View {
         modifier(OpenAdViewModifiler())
     }

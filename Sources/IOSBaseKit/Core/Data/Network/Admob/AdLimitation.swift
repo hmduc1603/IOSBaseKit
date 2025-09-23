@@ -7,16 +7,16 @@
 
 import Foundation
 
-struct AdLimitation: Codable {
-    let dailyInterstitialLimitation: Int
-    let showInterstitialAfterEveryNumber: Int
+public struct AdLimitation: Codable {
+    public let dailyInterstitialLimitation: Int
+    public let showInterstitialAfterEveryNumber: Int
 
-    enum CodingKeys: String, CodingKey {
-            case dailyInterstitialLimitation
-            case showInterstitialAfterEveryNumber
-        }
+    public enum CodingKeys: String, CodingKey {
+        case dailyInterstitialLimitation
+        case showInterstitialAfterEveryNumber
+    }
 
-    init(
+    public init(
         dailyInterstitialLimitation: Int = 1,
         showInterstitialAfterEveryNumber: Int = 2
     ) {
@@ -25,9 +25,10 @@ struct AdLimitation: Codable {
     }
 
     // Initialize from a JSON dictionary
-    init?(json: [String: Any]) {
+    public init?(json: [String: Any]) {
         guard let dailyInterstitialLimitation = json["dailyInterstitialLimitation"] as? Int,
-              let showInterstitialAfterEveryNumber = json["showInterstitialAfterEveryNumber"] as? Int else {
+              let showInterstitialAfterEveryNumber = json["showInterstitialAfterEveryNumber"] as? Int
+        else {
             return nil
         }
         self.dailyInterstitialLimitation = dailyInterstitialLimitation
@@ -35,7 +36,7 @@ struct AdLimitation: Codable {
     }
 
     // Convert to a JSON dictionary
-    func toJson() -> [String: Any] {
+    public func toJson() -> [String: Any] {
         [
             "dailyInterstitialLimitation": dailyInterstitialLimitation,
             "showInterstitialAfterEveryNumber": showInterstitialAfterEveryNumber,
@@ -43,12 +44,12 @@ struct AdLimitation: Codable {
     }
 
     // Convert to JSON data
-    func toJsonData() -> Data? {
+    public func toJsonData() -> Data? {
         try? JSONSerialization.data(withJSONObject: toJson(), options: .prettyPrinted)
     }
 
     // Create an instance from JSON data
-    static func fromJsonData(_ data: Data) -> Self? {
+    public static func fromJsonData(_ data: Data) -> Self? {
         guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
             return nil
         }

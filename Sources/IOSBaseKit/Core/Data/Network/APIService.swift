@@ -8,7 +8,7 @@
 import Alamofire
 import Foundation
 
-class APIService {
+public class APIService {
     private static func createURLRequest(
         url: String,
         method: HTTPMethod = .get,
@@ -27,7 +27,7 @@ class APIService {
         return request
     }
 
-    static func request<T: Decodable>(
+    public static func request<T: Decodable>(
         _ url: String,
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
@@ -64,7 +64,7 @@ class APIService {
         }
     }
 
-    static func request(
+    public static func request(
         _ url: String,
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
@@ -90,7 +90,7 @@ class APIService {
         }
     }
 
-    static func streamRequest(
+    public static func streamRequest(
         url: String,
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,

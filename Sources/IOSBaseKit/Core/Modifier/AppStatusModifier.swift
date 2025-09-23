@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct AppStatusModifier: ViewModifier {
+public struct AppStatusModifier: ViewModifier {
     @Environment(\.theme) private var theme
-    @Binding var status: AppStatus
-    var onRetry: (() -> Void)?
+    @Binding public var status: AppStatus
+    public var onRetry: (() -> Void)?
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if case .error(let error) = status,
            onRetry != nil
         {
@@ -37,7 +37,7 @@ struct AppStatusModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func observeAppStatus(
         status: Binding<AppStatus>,
         onRetry: (() -> Void)? = nil

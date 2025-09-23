@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct AppErrorView: View {
+public struct AppErrorView: View {
     @Environment(\.theme) private var theme
-    var errorMessage: String?
-    var onRetry: (() -> Void)? = nil
+    public var errorMessage: String?
+    public var onRetry: (() -> Void)? = nil
 
-    var body: some View {
+    public var body: some View {
         VStack {
             Text(errorMessage ?? "Something wrong happned, please try again!").themed()
                 .padding(.bottom, 8)

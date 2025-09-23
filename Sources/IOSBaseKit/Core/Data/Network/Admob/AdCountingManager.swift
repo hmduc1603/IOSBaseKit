@@ -7,7 +7,7 @@
 
 import Foundation
 
-class AdsCountingManager {
+public class AdsCountingManager: @unchecked Sendable {
     static let shared = AdsCountingManager()
     private init() {}
 
@@ -21,7 +21,7 @@ class AdsCountingManager {
         return AdCounter(adsCounting: 0, updatedDate: Date())
     }
 
-    func checkShouldShowAds(onShouldShowAds: @escaping (Bool) -> Void) {
+    public func checkShouldShowAds(onShouldShowAds: @escaping (Bool) -> Void) {
         var shouldShowAds = false
         guard let config = AdmobService.shared.config else {
             onShouldShowAds(shouldShowAds)
@@ -30,8 +30,9 @@ class AdsCountingManager {
 
         if Calendar.current.isDateInToday(adsCounter.updatedDate) {
             if adsCounter.adsCounting < config.adLimitation.dailyInterstitialLimitation {
-                if config.adLimitation.showInterstitialAfterEveryNumber > 0 &&
-                    (count == 0 || count % config.adLimitation.showInterstitialAfterEveryNumber == 0) {
+                if config.adLimitation.showInterstitialAfterEveryNumber > 0,
+                   count == 0 || count % config.adLimitation.showInterstitialAfterEveryNumber == 0
+                {
                     shouldShowAds = true
                     increaseCounter(adsCounter: adsCounter)
                 }

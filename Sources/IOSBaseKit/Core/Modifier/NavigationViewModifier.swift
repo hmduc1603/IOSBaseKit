@@ -8,17 +8,17 @@
 import FirebaseAnalytics
 import SwiftUI
 
-class Navigator: ObservableObject {
-    @Published var path = NavigationPath()
+public class Navigator: ObservableObject {
+    @Published public var path = NavigationPath()
 
     @MainActor
-    func push<V>(_ value: V) where V: Hashable {
+    public func push<V>(_ value: V) where V: Hashable {
         Analytics.logEvent(String(reflecting: V.self), parameters: nil)
         path.append(value)
     }
 
     @MainActor
-    func popAndPush<V>(_ value: V) where V: Hashable {
+    public func popAndPush<V>(_ value: V) where V: Hashable {
         Task { @MainActor in
             pop()
             try? await Task.sleep(for: .milliseconds(500))
@@ -27,16 +27,16 @@ class Navigator: ObservableObject {
     }
 
     @MainActor
-    func pop() {
+    public func pop() {
         path.removeLast()
     }
 }
 
-struct NavigationViewModifier: ViewModifier {
+public struct NavigationViewModifier: ViewModifier {
     @StateObject private var navigator = Navigator()
     @Environment(\.theme) private var theme
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         NavigationStack(path: $navigator.path) {
             content
                 .background(theme.primary)
@@ -45,21 +45,21 @@ struct NavigationViewModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func enableNavigationStack() -> some View {
         modifier(NavigationViewModifier())
     }
 }
 
-struct NavigationBarViewModifier: ViewModifier {
+public struct NavigationBarViewModifier: ViewModifier {
     @Environment(\.theme) private var theme
     @EnvironmentObject private var navigator: Navigator
 
-    var title: String
-    var trailingTitle: String?
-    var onTrailingTap: (() -> Void)? = nil
+    public var title: String
+    public var trailingTitle: String?
+    public var onTrailingTap: (() -> Void)? = nil
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .navigationBarBackButtonHidden(true)
             .toolbarRole(.editor)
@@ -94,7 +94,7 @@ struct NavigationBarViewModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func setupNavigationBar(
         title: String,
         trailingTitle: String? = nil,
@@ -104,19 +104,3 @@ extension View {
     }
 }
 
-// MARK: Enable swipe gesture to back
-
-extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
-    override open func viewDidLoad() {
-        super.viewDidLoad()
-        interactivePopGestureRecognizer?.delegate = self
-    }
-
-    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        return viewControllers.count > 1 && presentedViewController == nil
-    }
-
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        true
-    }
-}

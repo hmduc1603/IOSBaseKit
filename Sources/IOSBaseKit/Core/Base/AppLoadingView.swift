@@ -7,17 +7,17 @@
 
 import SwiftUI
 
-struct AppLoadingHUD: View {
+public struct AppLoadingHUD: View {
     @Environment(\.theme) private var theme
-    var message: String?
+    public var message: String?
 
-    var body: some View {
+    public var body: some View {
         ZStack {
             VStack {
                 AppLoadingIndicator()
                 if message != nil {
                     Spacer().frame(height: 30)
-                    Text(message!).themed()
+                    Text(message!).themed(style: theme.textThemeT1.body.copyWith(color: theme.primary))
                         .multilineTextAlignment(.center)
                 }
             }.frame(maxWidth: /*@START_MENU_TOKEN@*/ .infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity)
@@ -40,12 +40,16 @@ struct AppLoadingView: View {
     }
 }
 
-struct AppLoadingIndicator: View {
+public struct AppLoadingIndicator: View {
     @Environment(\.theme) private var theme
 
     var scaleEffect: Double = 1.2
-     
-    var body: some View {
+
+    public init(scaleEffect: Double = 1.2) {
+        self.scaleEffect = scaleEffect
+    }
+
+    public var body: some View {
         ProgressView()
             .progressViewStyle(CircularProgressViewStyle(tint: theme.btnColor))
             .scaleEffect(scaleEffect)

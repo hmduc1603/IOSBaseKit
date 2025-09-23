@@ -5,7 +5,6 @@
 //  Created by Dennis Hoang on 29/08/2024.
 //
 
-import IOSBaseKit
 import SwiftUI
 
 public struct AppTextTheme: Sendable {
@@ -23,37 +22,21 @@ public struct AppTextTheme: Sendable {
     public let small: TextStyle
     public let caption: TextStyle
 
-    public init(bigTitle: TextStyle, title: TextStyle, button: TextStyle, textButton: TextStyle, header0: TextStyle, header1: TextStyle, header2: TextStyle, body: TextStyle, light: TextStyle, error: TextStyle, placeHolder: TextStyle, small: TextStyle, caption: TextStyle) {
-        self.bigTitle = bigTitle
-        self.title = title
-        self.button = button
-        self.textButton = textButton
-        self.header0 = header0
-        self.header1 = header1
-        self.header2 = header2
-        self.body = body
-        self.light = light
-        self.error = error
-        self.placeHolder = placeHolder
-        self.small = small
-        self.caption = caption
-    }
-
     public static func create(color: Color) -> Self {
         Self(
-            bigTitle: TextStyle(font: Font.system(size: 18).weight(.bold), color: color, weight: .bold),
-            title: TextStyle(font: Font.system(size: 16).weight(.bold), color: color, weight: .bold),
-            button: TextStyle(font: Font.system(size: 16).weight(.bold), color: color, weight: .bold),
-            textButton: TextStyle(font: Font.system(size: 15), color: color),
-            header0: TextStyle(font: Font.system(size: 40).weight(.bold), color: color, weight: .bold),
-            header1: TextStyle(font: Font.system(size: 30).weight(.bold), color: color, weight: .bold),
-            header2: TextStyle(font: Font.system(size: 20).weight(.bold), color: color, weight: .bold),
-            body: TextStyle(font: Font.system(size: 15), color: color),
-            light: TextStyle(font: Font.system(size: 13).weight(.light), color: color, weight: .light),
-            error: TextStyle(font: Font.system(size: 17), color: color),
-            placeHolder: TextStyle(font: Font.system(size: 15), color: color),
-            small: TextStyle(font: Font.system(size: 10), color: color),
-            caption: TextStyle(font: Font.system(size: 14), color: color)
+            bigTitle: TextStyle(font: Font.system(size: 18, design: .rounded).weight(.bold), color: color, weight: .bold),
+            title: TextStyle(font: Font.system(size: 16, design: .rounded).weight(.bold), color: color, weight: .bold),
+            button: TextStyle(font: Font.system(size: 16, design: .rounded).weight(.bold), color: color, weight: .bold),
+            textButton: TextStyle(font: Font.system(size: 15, design: .rounded), color: color),
+            header0: TextStyle(font: Font.system(size: 40, design: .rounded).weight(.bold), color: color, weight: .bold),
+            header1: TextStyle(font: Font.system(size: 30, design: .rounded).weight(.bold), color: color, weight: .bold),
+            header2: TextStyle(font: Font.system(size: 20, design: .rounded).weight(.bold), color: color, weight: .bold),
+            body: TextStyle(font: Font.system(size: 15, design: .rounded), color: color),
+            light: TextStyle(font: Font.system(size: 13, design: .rounded).weight(.light), color: color, weight: .light),
+            error: TextStyle(font: Font.system(size: 17, design: .rounded), color: color),
+            placeHolder: TextStyle(font: Font.system(size: 15, design: .rounded), color: color),
+            small: TextStyle(font: Font.system(size: 10, design: .rounded), color: color),
+            caption: TextStyle(font: Font.system(size: 14, design: .rounded), color: color)
         )
     }
 }

@@ -7,13 +7,19 @@
 
 import SwiftUI
 
-struct AppTextField: View {
+public struct AppTextField: View {
     @Environment(\.theme) private var theme
-    @Binding var inputText: String
-    var keyboardType: UIKeyboardType = .default
-    var placeholder: String?
+    @Binding public var inputText: String
+    public var keyboardType: UIKeyboardType = .default
+    public var placeholder: String?
 
-    var body: some View {
+    public init(inputText: Binding<String>, keyboardType: UIKeyboardType = .default, placeholder: String? = nil) {
+        self._inputText = inputText
+        self.keyboardType = keyboardType
+        self.placeholder = placeholder
+    }
+
+    public var body: some View {
         ZStack {
             if let placeholder = placeholder {
                 if $inputText.wrappedValue.isEmpty {
@@ -40,14 +46,21 @@ struct AppTextField: View {
     }
 }
 
-struct AppTextEditor: View {
+public struct AppTextEditor: View {
     @Environment(\.theme) private var theme
-    @Binding var inputText: String
-    var keyboardType: UIKeyboardType = .default
-    var placeholder: String?
-    var fieldHeight: CGFloat = 100
+    @Binding public var inputText: String
+    public var keyboardType: UIKeyboardType = .default
+    public var placeholder: String?
+    public var fieldHeight: CGFloat = 100
 
-    var body: some View {
+    public init(inputText: Binding<String>, keyboardType: UIKeyboardType = .default, placeholder: String? = nil, fieldHeight: CGFloat = 100) {
+        self._inputText = inputText
+        self.keyboardType = keyboardType
+        self.placeholder = placeholder
+        self.fieldHeight = fieldHeight
+    }
+
+    public var body: some View {
         ZStack {
             if let placeholder = placeholder {
                 VStack(spacing: 0) {

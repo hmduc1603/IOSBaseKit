@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-struct TextModifierLeadingFullWidth: ViewModifier {
-    func body(content: Content) -> some View {
+public struct TextModifierLeadingFullWidth: ViewModifier {
+    public func body(content: Content) -> some View {
         content
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-extension View {
+public extension View {
     func leadingFullWidth() -> some View {
         modifier(TextModifierLeadingFullWidth())
     }

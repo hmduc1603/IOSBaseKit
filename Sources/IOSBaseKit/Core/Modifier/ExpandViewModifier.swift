@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-struct ExpandViewModifier: ViewModifier {
-    var maxWidth: CGFloat?
-    var maxHeight: CGFloat?
+public struct ExpandViewModifier: ViewModifier {
+    public var maxWidth: CGFloat?
+    public var maxHeight: CGFloat?
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .frame(maxWidth: maxWidth, maxHeight: maxHeight)
     }

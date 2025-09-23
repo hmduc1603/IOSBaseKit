@@ -6,27 +6,27 @@
 //
 import Foundation
 
-struct DailyLimitation: Codable {
-    let dailyLimitation: Int
+public struct DailyLimitation: Codable {
+    public let dailyLimitation: Int
 
-    init(dailyLimitation: Int = 1) {
+    public init(dailyLimitation: Int = 1) {
         self.dailyLimitation = dailyLimitation
     }
 }
 
-struct DailyCounter: Codable {
-    var updatedDate: Date
-    var counting: Int
-    var type: String
+public struct DailyCounter: Codable {
+    public var updatedDate: Date
+    public var counting: Int
+    public var type: String
 
-    mutating func resetToNewDay() {
+    public mutating func resetToNewDay() {
         counting = 0
         updatedDate = Date()
     }
 }
 
-class DailyCountingManager {
-    static let shared = DailyCountingManager()
+public class DailyCountingManager: @unchecked Sendable {
+    public static let shared = DailyCountingManager()
     private init() {}
 
     private let limitationKey = "DailyLimitation"
@@ -34,14 +34,14 @@ class DailyCountingManager {
 
     private var _limitation: DailyLimitation = .init()
 
-    func setUpLimitation(_ limitation: DailyLimitation) {
+    public func setUpLimitation(_ limitation: DailyLimitation) {
         _limitation = limitation
         if let data = try? JSONEncoder().encode(limitation) {
             UserDefaults.standard.set(data, forKey: limitationKey)
         }
     }
 
-    var dailyCounter: DailyCounter? {
+    public var dailyCounter: DailyCounter? {
         get {
             guard let data = UserDefaults.standard.data(forKey: counterKey),
                   let counter = try? JSONDecoder().decode(DailyCounter.self, from: data)
@@ -59,7 +59,7 @@ class DailyCountingManager {
         }
     }
 
-    func todayLeft(counter: DailyCounter?) -> Int {
+    public func todayLeft(counter: DailyCounter?) -> Int {
         guard let counter = counter else {
             return _limitation.dailyLimitation
         }
@@ -71,7 +71,7 @@ class DailyCountingManager {
         }
     }
 
-    func checkShouldProceed(onShouldProceed: (Bool, DailyCounter?) -> Void) {
+    public func checkShouldProceed(onShouldProceed: (Bool, DailyCounter?) -> Void) {
         if UserDefaults.standard.isPremium {
             onShouldProceed(true, nil)
             return
@@ -96,7 +96,7 @@ class DailyCountingManager {
         onShouldProceed(shouldProceed, counter)
     }
 
-    func increaseCounter(type: String) {
+    public func increaseCounter(type: String) {
         print("DailyCountingManager: increaseCounter")
         var counter = dailyCounter
         let calendar = Calendar.current
@@ -109,7 +109,7 @@ class DailyCountingManager {
         dailyCounter = counter
     }
 
-    func decreaseCounter(type: String) {
+    public func decreaseCounter(type: String) {
         print("DailyCountingManager: decreaseCounter")
         var counter = dailyCounter
         if let c = counter, c.counting > 0 {

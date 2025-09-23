@@ -9,11 +9,11 @@
 import Foundation
 import SwiftUI
 
-struct OpenAdViewModifiler: ViewModifier {
+public struct OpenAdViewModifiler: ViewModifier {
     @Environment(\.scenePhase) private var scenePhase
     @State private var didEnterBG = false
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
@@ -34,5 +34,3 @@ struct OpenAdViewModifiler: ViewModifier {
             }
     }
 }
-
-

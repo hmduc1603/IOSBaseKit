@@ -12,16 +12,16 @@ import Foundation
 import StoreKit
 import SwiftUI
 
-final class PurchaseService {
-    static let shared = PurchaseService()
+public final class PurchaseService: @unchecked Sendable {
+    public static let shared = PurchaseService()
 
     public var recorder: PurchaseRecordPotocol?
 
     private var transactionObservingTask: Task<Void, Never>?
-    var products: [Product] = []
-    var introProducts: [Product] = []
+    public var products: [Product] = []
+    public var introProducts: [Product] = []
 
-    func loadProducts(ids: [String], introIds: [String]) async {
+    public func loadProducts(ids: [String], introIds: [String]) async {
         var productIds = ids + introIds
         #if DEBUG
             productIds = debugProductIds
@@ -39,7 +39,7 @@ final class PurchaseService {
         } catch { print("Load error: \(error)") }
     }
 
-    func hasActiveEntitlement() async -> Bool {
+    public func hasActiveEntitlement() async -> Bool {
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result {
                 switch transaction.productType {
@@ -61,7 +61,7 @@ final class PurchaseService {
     }
 
     /// Call this function to start observing transactions
-    func startObservingTransactions() {
+    public func startObservingTransactions() {
         self.transactionObservingTask = Task.detached(priority: .background) {
             for await result in Transaction.updates {
                 switch result {
@@ -83,11 +83,11 @@ final class PurchaseService {
     }
 
     /// Function to restore completed transactions
-    func restoreCompletedTransactions() async {
+    public func restoreCompletedTransactions() async {
         try? await AppStore.sync()
     }
 
-    func purchase(product: Product, isIntroSub: Bool) async -> Bool {
+    public func purchase(product: Product, isIntroSub: Bool) async -> Bool {
         do {
             let result = try await product.purchase()
             switch result {
@@ -128,7 +128,7 @@ final class PurchaseService {
     }
 
     @MainActor
-    func requestReview() {
+    public func requestReview() {
         if let scene = UIApplication.shared.connectedScenes
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
         {
@@ -141,7 +141,7 @@ final class PurchaseService {
     }
 }
 
-extension PurchaseService {
+public extension PurchaseService {
     /// You need to configure StoreKit Configuration
     var debugProductIds: [String] {
         [
@@ -152,7 +152,7 @@ extension PurchaseService {
     }
 }
 
-protocol PurchaseRecordPotocol {
+public protocol PurchaseRecordPotocol {
     func recordPurchase(
         productId: String,
         transactionId: String,

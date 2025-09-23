@@ -5,11 +5,12 @@
 //  Created by Dennis Hoang on 28/08/2024.
 //
 
+import DynamicColor
 import IOSBaseKit
 import SwiftUI
 
 public struct ThemeKey: EnvironmentKey {
-    public static let defaultValue: AppTheme = .default
+    public static let defaultValue: AppTheme = .createDefaultTheme()
 }
 
 public extension EnvironmentValues {
@@ -34,45 +35,23 @@ public struct AppTheme: Sendable {
     public var textThemeT3: AppTextTheme
     public var textThemeT4: AppTextTheme
 
-    public static let light = Self(
-        primary: AppColor.primary.color,
-        secondary: AppColor.button.color,
-        textColor: Color.white,
-        textBtnColor: AppColor.primary.color,
-        cardColor: AppColor.card.color,
-        btnColor: AppColor.button.color,
-        splashColor: AppColor.primary.color,
-        textThemeT1: AppTextTheme.create(color: Color.white.opacity(1.0)),
-        textThemeT2: AppTextTheme.create(color: Color.white.opacity(0.75)),
-        textThemeT3: AppTextTheme.create(color: Color.white.opacity(0.5)),
-        textThemeT4: AppTextTheme.create(color: Color.white.opacity(0.25))
-    )
-
-    public static let dark = Self(
-        primary: AppColor.primary.color,
-        secondary: AppColor.button.color,
-        textColor: Color.white,
-        textBtnColor: Color.white,
-        cardColor: Color.clear,
-        btnColor: AppColor.button.color,
-        splashColor: AppColor.primary.color,
-        textThemeT1: AppTextTheme.create(color: Color.white.opacity(1.0)),
-        textThemeT2: AppTextTheme.create(color: Color.white.opacity(0.75)),
-        textThemeT3: AppTextTheme.create(color: Color.white.opacity(0.5)),
-        textThemeT4: AppTextTheme.create(color: Color.white.opacity(0.25))
-    )
-
-    public static let `default` = light
+    public static func createDefaultTheme() -> Self {
+        return .init(
+            primary: AppColor.shared.primaryColor,
+            secondary: AppColor.shared.secondaryColor,
+            textColor: AppColor.shared.textColor,
+            textBtnColor: AppColor.shared.textColor,
+            cardColor: AppColor.shared.cardColor,
+            btnColor: AppColor.shared.buttonColor,
+            splashColor: AppColor.shared.primaryColor,
+            textThemeT1: AppTextTheme.create(color: AppColor.shared.textColor.opacity(1.0)),
+            textThemeT2: AppTextTheme.create(color: AppColor.shared.textColor.opacity(0.75)),
+            textThemeT3: AppTextTheme.create(color: AppColor.shared.textColor.opacity(0.5)),
+            textThemeT4: AppTextTheme.create(color: AppColor.shared.textColor.opacity(0.25))
+        )
+    }
 }
 
 public class ThemeManager: ObservableObject {
-    @Published public var currentTheme: AppTheme = .default
-
-    public func switchToDarkMode() {
-        currentTheme = .dark
-    }
-
-    public func switchToLightMode() {
-        currentTheme = .light
-    }
+    @Published public var currentTheme: AppTheme = .createDefaultTheme()
 }

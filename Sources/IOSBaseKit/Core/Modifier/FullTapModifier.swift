@@ -7,10 +7,10 @@
 
 import SwiftUI
 
-struct FullTapModifier: ViewModifier {
-    var onTap: () -> Void
+public struct FullTapModifier: ViewModifier {
+    public var onTap: () -> Void
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .overlay {
                 Color.white.opacity(0.00000009)
@@ -21,7 +21,7 @@ struct FullTapModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func onFullTapGesture(_ perform: @escaping () -> Void) -> some View {
         modifier(FullTapModifier(onTap: perform))
     }

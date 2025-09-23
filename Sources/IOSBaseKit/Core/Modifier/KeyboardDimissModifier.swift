@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct KeyboardDimissModifier: ViewModifier {
-    func body(content: Content) -> some View {
+public struct KeyboardDimissModifier: ViewModifier {
+    public func body(content: Content) -> some View {
         content.onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
                                             to: nil,
@@ -18,7 +18,7 @@ struct KeyboardDimissModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func addKeyboardDimisser() -> some View {
         modifier(KeyboardDimissModifier())
     }

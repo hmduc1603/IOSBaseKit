@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-struct DialogViewModifier: ViewModifier {
+public struct DialogViewModifier: ViewModifier {
     @Environment(\.theme) private var theme
     @State private var showAlert: Bool = false
     @State private var alertTitle: String = ""
     @State private var alertDesc: String? = nil
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .onAppear {
-                UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor(hexString: AppColor.button.rawValue)
+                UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor(hexString: AppColor.shared.getColorHex(key: "buttonColor"))
             }
             .onReceive(EvenBusManager.shared.subscribe(for: AppMessageEvent.self), perform: { event in
                 alertTitle = event.message
@@ -40,7 +40,7 @@ struct DialogViewModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func observeDialogView() -> some View {
         modifier(DialogViewModifier())
     }

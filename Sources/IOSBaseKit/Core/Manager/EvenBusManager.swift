@@ -8,27 +8,27 @@
 import Combine
 import Foundation
 
-struct EvenBusManager {
-    static let shared = Self()
+public struct EvenBusManager: @unchecked Sendable {
+    public static let shared = Self()
 
     private let eventSubject = PassthroughSubject<BaseEvent, Never>()
 
-    func subscribe<T: BaseEvent>(for _: T.Type) -> AnyPublisher<T, Never> {
+    public func subscribe<T: BaseEvent>(for _: T.Type) -> AnyPublisher<T, Never> {
         eventSubject
             .compactMap { $0 as? T } // Cast the BaseEvent to the specific event type
             .eraseToAnyPublisher() // Convert to AnyPublisher with `Never` as Failure type
     }
-    
-    func subscribeWithThrottle<T: BaseEvent>(for _: T.Type, seconds: Int) -> AnyPublisher<T, Never> {
+
+    public func subscribeWithThrottle<T: BaseEvent>(for _: T.Type, seconds: Int) -> AnyPublisher<T, Never> {
         eventSubject
             .compactMap { $0 as? T } // Cast the BaseEvent to the specific event type
             .throttle(for: .seconds(seconds), scheduler: RunLoop.main, latest: true)
             .eraseToAnyPublisher() // Convert to AnyPublisher with `Never` as Failure type
     }
 
-    func fire(event: BaseEvent) {
+    public func fire(event: BaseEvent) {
         print("EvenBusManager: Firing event: \(event)")
-        DispatchQueue.main.async {
+        Task { @MainActor in
             eventSubject.send(event)
         }
     }

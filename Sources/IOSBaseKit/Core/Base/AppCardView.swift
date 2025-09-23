@@ -7,14 +7,21 @@
 
 import SwiftUI
 
-struct AppCardView<Content: View>: View {
+public struct AppCardView<Content: View>: View {
     @Environment(\.theme) private var theme: AppTheme
-    var padding: CGFloat = 12
-    var radius: CGFloat = 12
-    var backgroundColor: Color?
-    @ViewBuilder var content: () -> Content
+    public var padding: CGFloat
+    public var radius: CGFloat
+    public var backgroundColor: Color?
+    @ViewBuilder public var content: () -> Content
 
-    var body: some View {
+    public init(padding: CGFloat = 12, radius: CGFloat = 12, backgroundColor: Color? = nil, content: @escaping () -> Content) {
+        self.padding = padding
+        self.radius = radius
+        self.backgroundColor = backgroundColor
+        self.content = content
+    }
+
+    public var body: some View {
         VStack {
             content()
         }.padding(padding)

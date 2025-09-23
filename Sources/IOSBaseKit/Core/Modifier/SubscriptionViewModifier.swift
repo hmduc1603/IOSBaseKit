@@ -9,14 +9,13 @@ import Factory
 import StoreKit
 import SwiftUI
 
-struct SubscriptionViewModifier: ViewModifier {
+public struct SubscriptionViewModifier: ViewModifier {
     @Environment(\.theme) private var theme
-    @Injected(\.purchaseService) private var purchaseService
 
     @State private var shouldShowSubScreen: Bool = false
     @State private var shouldIntroShowSubScreen: Bool = false
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .onReceive(EvenBusManager.shared.subscribe(for: ShowSubscriptionViewEvent.self),
                        perform: { _ in
@@ -32,7 +31,7 @@ struct SubscriptionViewModifier: ViewModifier {
                 SubscriptionFrameView { showLoading in
                     SubscriptionPickerView(
                         isIntroSub: false,
-                        products: purchaseService.products,
+                        products: PurchaseService.shared.products,
                         showLoading: showLoading
                     )
                 }
@@ -43,7 +42,7 @@ struct SubscriptionViewModifier: ViewModifier {
                 SubscriptionFrameView { showLoading in
                     SubscriptionPickerView(
                         isIntroSub: true,
-                        products: purchaseService.introProducts,
+                        products: PurchaseService.shared.introProducts,
                         showLoading: showLoading
                     )
                 }
@@ -51,7 +50,7 @@ struct SubscriptionViewModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func enableSubscriptionStoreView() -> some View {
         modifier(SubscriptionViewModifier())
     }
@@ -66,7 +65,6 @@ extension View {
 }
 
 private struct SubscriptionFrameView<Content: View>: View {
-    @Injected(\.remoteConfigService) private var remoteConfigService
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
 
@@ -78,17 +76,7 @@ private struct SubscriptionFrameView<Content: View>: View {
             ZStack {
                 VStack {
                     LinearGradient(
-                        colors: [
-                            AppColor.gradient1.color,
-                            AppColor.gradient2.color,
-                            AppColor.gradient3.color,
-                            AppColor.gradient3.color.opacity(0.85),
-                            AppColor.gradient3.color.opacity(0.65),
-                            AppColor.gradient3.color.opacity(0.45),
-                            AppColor.gradient3.color.opacity(0.25),
-                            AppColor.gradient3.color.opacity(0.1),
-                            Color.clear,
-                        ],
+                        colors: AppColor.shared.subscriptionGradientColors,
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -106,9 +94,10 @@ private struct SubscriptionFrameView<Content: View>: View {
                                 .resizable()
                                 .renderingMode(.template)
                                 .frame(width: 26, height: 26)
-                                .foregroundColor(theme.textColor)
+                                .foregroundColor(theme.btnColor)
                         }
                     }
+                    .padding(.top, 20)
                     VStack {
                         VStack {
                             Image("ic_app")
@@ -118,7 +107,7 @@ private struct SubscriptionFrameView<Content: View>: View {
                         }
                         .padding(.all, 15)
                     }
-                    .background(theme.textColor)
+                    .background(AppColor.shared.subscriptionIconBackgroundColor)
                     .cornerRadius(12)
                     .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
                     .rotationEffect(.degrees(25))
@@ -142,7 +131,7 @@ private struct SubscriptionFrameView<Content: View>: View {
 
     private func buildFeatureList() -> some View {
         VStack(spacing: 5) {
-            ForEach(remoteConfigService.iosProducts.features, id: \.self) { item in
+            ForEach(RemoteConfigServiceImpl.shared.iosProducts.features, id: \.self) { item in
                 Text(item)
                     .themed(style: theme.textThemeT1.title)
             }
@@ -150,18 +139,17 @@ private struct SubscriptionFrameView<Content: View>: View {
     }
 }
 
-struct SubscriptionPickerView: View {
+public struct SubscriptionPickerView: View {
     @Environment(\.dismiss) private var dismiss
-    @Injected(\.purchaseService) private var purchaseService
     @Environment(\.theme) private var theme
 
     @State private var selectedProduct: Product?
 
-    var isIntroSub: Bool
-    var products: [Product]
-    @Binding var showLoading: Bool
+    public var isIntroSub: Bool
+    public var products: [Product]
+    @Binding public var showLoading: Bool
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 15) {
             Spacer()
             ForEach(products, id: \.id) { item in
@@ -184,7 +172,7 @@ struct SubscriptionPickerView: View {
                             return
                         }
                         showLoading = true
-                        if await purchaseService.purchase(product: product, isIntroSub: isIntroSub) {
+                        if await PurchaseService.shared.purchase(product: product, isIntroSub: isIntroSub) {
                             dismiss()
                         }
                         showLoading = false
@@ -193,7 +181,7 @@ struct SubscriptionPickerView: View {
             }
         }
         .onAppear {
-            selectedProduct = purchaseService.introProducts.first
+            selectedProduct = PurchaseService.shared.introProducts.first
         }
     }
 
@@ -238,7 +226,7 @@ struct SubscriptionPickerView: View {
             borderLineWidth: item == selectedProduct ? 2 : 0,
             borderColor: theme.btnColor,
         )
-        .shadow(color: theme.primary.opacity(0.15), radius: 8, x: 0, y: 0)
+        .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 0)
         .onTapGesture {
             selectedProduct = item
         }

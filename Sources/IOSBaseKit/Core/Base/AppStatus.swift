@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum AppStatus: Equatable {
+public enum AppStatus: Equatable {
     case idle
     case error(error: String?)
     case loading(message: String?)
 
-    var message: String? {
+    public var message: String? {
         switch self {
         case .idle:
             return ""
@@ -23,11 +23,11 @@ enum AppStatus: Equatable {
         }
     }
 
-    var isIdle: Bool {
+    public var isIdle: Bool {
         return self == .idle
     }
 
-    var isLoading: Bool {
+    public var isLoading: Bool {
         if case .loading = self {
             return true
         }

@@ -9,13 +9,13 @@
 import Foundation
 import SwiftUI
 
-struct ModifierCornerRadiusWithBorder: ViewModifier {
-    var radius: CGFloat
-    var borderLineWidth: CGFloat = 1
-    var borderColor: Color = .gray
-    var antialiased = true
+public struct ModifierCornerRadiusWithBorder: ViewModifier {
+    public var radius: CGFloat
+    public var borderLineWidth: CGFloat = 1
+    public var borderColor: Color = .gray
+    public var antialiased = true
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .cornerRadius(self.radius, antialiased: self.antialiased)
             .overlay(
@@ -25,7 +25,7 @@ struct ModifierCornerRadiusWithBorder: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func cornerRadiusWithBorder(radius: CGFloat, borderLineWidth: CGFloat = 1, borderColor: Color = .gray, antialiased: Bool = true) -> some View {
         modifier(ModifierCornerRadiusWithBorder(radius: radius, borderLineWidth: borderLineWidth, borderColor: borderColor, antialiased: antialiased))
     }

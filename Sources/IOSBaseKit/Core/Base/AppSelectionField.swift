@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-struct AppSelectionField<M: Hashable & ItemLabelProtocol>: View {
+public struct AppSelectionField<M: Hashable & ItemLabelProtocol>: View {
     @Environment(\.theme) private var theme
 
-    @Binding var selectedItem: M
-    var title: String
-    var onTap: () -> Void
+    @Binding public var selectedItem: M
+    public var title: String
+    public var onTap: () -> Void
 
-    var body: some View {
+    public var body: some View {
         HStack(spacing: 20) {
             Text(title)
                 .themed(style: theme.textThemeT1.title)

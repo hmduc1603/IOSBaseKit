@@ -9,12 +9,12 @@ import Combine
 import Foundation
 import SwiftUI
 
-struct ScrollOnKeyboardViewModifier: ViewModifier {
+public struct ScrollOnKeyboardViewModifier: ViewModifier {
     @State private var keyboardHeight: CGFloat = 0
     @State private var cancellable: AnyCancellable?
-    var scrollToID: String
+    public var scrollToID: String
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         ScrollViewReader { scrollViewProxy in
             content
                 .onChange(of: keyboardHeight) { _, newValue in
@@ -39,7 +39,7 @@ struct ScrollOnKeyboardViewModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func scrollToBottomOnKeyboard(scrollToID: String) -> some View {
         modifier(ScrollOnKeyboardViewModifier(scrollToID: scrollToID))
     }

@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct AdConfig: Codable {
-    let enableInterstitialAd: Bool?
-    let enableOpenAd: Bool?
-    let enableBannerAd: Bool?
-    let enableRewardAd: Bool?
-    let adLimitation: AdLimitation
+public struct AdConfig: Codable {
+    public let enableInterstitialAd: Bool?
+    public let enableOpenAd: Bool?
+    public let enableBannerAd: Bool?
+    public let enableRewardAd: Bool?
+    public let adLimitation: AdLimitation
 
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case enableInterstitialAd
         case enableOpenAd
         case enableBannerAd
@@ -22,7 +22,7 @@ struct AdConfig: Codable {
         case adLimitation
     }
 
-    init(
+    public init(
         enableInterstitialAd: Bool,
         enableOpenAd: Bool,
         enableBannerAd: Bool,
@@ -37,7 +37,7 @@ struct AdConfig: Codable {
     }
 
     // Initialize from a JSON dictionary
-    init?(json: [String: Any]) {
+    public init?(json: [String: Any]) {
         self.enableInterstitialAd = json["enableInterstitialAd"] as? Bool
         self.enableOpenAd = json["enableOpenAd"] as? Bool
         self.enableBannerAd = json["enableBannerAd"] as? Bool
@@ -46,7 +46,7 @@ struct AdConfig: Codable {
     }
 
     // Create an instance from JSON data
-    static func fromJsonData(json: [String: Any]) -> Self? {
+    public static func fromJsonData(json: [String: Any]) -> Self? {
         Self(json: json)
     }
 }

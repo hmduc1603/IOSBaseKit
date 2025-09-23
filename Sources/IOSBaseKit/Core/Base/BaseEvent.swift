@@ -8,43 +8,60 @@
 import Foundation
 import StoreKit
 
-protocol BaseEvent {
+public protocol BaseEvent: Sendable {
     var eventName: String { get }
 }
 
-struct AppErrorEvent: BaseEvent {
-    var eventName: String {
+public struct AppErrorEvent: BaseEvent {
+    public var eventName: String {
         "AppErrorEvent"
     }
 
-    var error: String
+    public var error: String
+
+    public init(error: String) {
+        self.error = error
+    }
 }
 
-struct AppLoadingEvent: BaseEvent {
-    var eventName: String {
+public struct AppLoadingEvent: BaseEvent {
+    public var eventName: String {
         "AppLoadingEvent"
     }
 
-    var isLoading: Bool
-    var message: String?
+    public var isLoading: Bool
+    public var message: String?
+
+    public init(isLoading: Bool, message: String? = nil) {
+        self.isLoading = isLoading
+        self.message = message
+    }
 }
 
-struct AppMessageEvent: BaseEvent {
-    var eventName: String {
+public struct AppMessageEvent: BaseEvent {
+    public var eventName: String {
         "AppMessageEvent"
     }
 
-    var message: String
+    public var message: String
+
+    public init(message: String) {
+        self.message = message
+    }
 }
 
-struct ShowSubscriptionViewEvent: BaseEvent {
-    var eventName: String {
+public struct ShowSubscriptionViewEvent: BaseEvent {
+    public var eventName: String {
         "ShowSubscriptionViewEvent"
     }
+
+    public init() {}
 }
 
-struct ShowIntroSubscriptionViewEvent: BaseEvent {
-    var eventName: String {
+public struct ShowIntroSubscriptionViewEvent: BaseEvent {
+    public var eventName: String {
         "ShowIntroSubscriptionViewEvent"
     }
+
+    public init() {}
 }

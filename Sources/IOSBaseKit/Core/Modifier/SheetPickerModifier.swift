@@ -7,19 +7,19 @@
 
 import SwiftUI
 
-protocol ItemLabelProtocol {
+public protocol ItemLabelProtocol {
     var label: String { get }
 }
 
-struct SheetPickerModifier<M: Hashable & ItemLabelProtocol>: ViewModifier {
+public struct SheetPickerModifier<M: Hashable & ItemLabelProtocol>: ViewModifier {
     @Environment(\.theme) private var theme
 
-    @Binding var showingPicker: Bool
-    @Binding var selectedItem: M
-    var items: [M]
-    var title: String
+    @Binding public var showingPicker: Bool
+    @Binding public var selectedItem: M
+    public var items: [M]
+    public var title: String
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .sheet(isPresented: $showingPicker) {
                 VStack {
@@ -49,7 +49,7 @@ struct SheetPickerModifier<M: Hashable & ItemLabelProtocol>: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func sheetPicker<M: Hashable & ItemLabelProtocol>(
         showingPicker: Binding<Bool>,
         selectedItem: Binding<M>,

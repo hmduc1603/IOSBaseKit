@@ -5,13 +5,13 @@
 //  Created by Dennis Hoang on 13/9/25.
 //
 
-struct PurchaseConfig: Decodable {
-    let headers: Headers
-    let hostUrl: String
+public struct PurchaseConfig: Decodable {
+    public let headers: Headers
+    public let hostUrl: String
 
-    struct Headers: Decodable {
-        let appName: String
-        let serviceName: String
-        let projectId: String
+    public struct Headers: Decodable {
+        public let appName: String
+        public let serviceName: String
+        public let projectId: String
     }
 }

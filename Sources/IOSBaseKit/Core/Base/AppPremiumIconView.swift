@@ -7,13 +7,18 @@
 
 import SwiftUI
 
-struct AppPremiumIconView: View {
+public struct AppPremiumIconView: View {
     @AppStorage(UserDefaults.Key.isPremium.rawValue) private var isPremium: Bool = false
-    
-    var iconString: String
-    var onPremiumTapped: (() -> Void)?
 
-    var body: some View {
+    public var iconString: String
+    public var onPremiumTapped: (() -> Void)?
+
+    public init(iconString: String, onPremiumTapped: (() -> Void)? = nil) {
+        self.iconString = iconString
+        self.onPremiumTapped = onPremiumTapped
+    }
+
+    public var body: some View {
         if !isPremium {
             Button {
                 onPremiumTapped?() ?? showSubscriptionView()

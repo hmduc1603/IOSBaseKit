@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-struct AppPrimaryButton: View {
+public struct AppPrimaryButton: View {
     @Environment(\.theme) private var theme: AppTheme
-    @Binding var isButtonEnabled: Bool
-    var buttonTitle: String
-    var buttonColor: Color?
-    var textStyle: TextStyle?
-    var buttonHeight: CGFloat?
-    var action: () -> Void
+    @Binding public var isButtonEnabled: Bool
+    public var buttonTitle: String
+    public var buttonColor: Color?
+    public var textStyle: TextStyle?
+    public var buttonHeight: CGFloat?
+    public var action: () -> Void
 
-    init(
+    public init(
         isButtonEnabled: Binding<Bool>? = nil,
         buttonTitle: String,
         buttonColor: Color? = nil,
@@ -32,7 +32,7 @@ struct AppPrimaryButton: View {
         self.textStyle = textStyle
     }
 
-    var body: some View {
+    public var body: some View {
         Button {
             action()
         } label: {
@@ -43,7 +43,7 @@ struct AppPrimaryButton: View {
             .frame(height: 50)
             .widthExpanded()
             .background(
-                buttonColor ?? AppColor.button.color
+                buttonColor ?? theme.btnColor
             )
             .cornerRadius(12)
         }

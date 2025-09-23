@@ -6,14 +6,14 @@
 //
 import SwiftUI
 
-struct AppStepIndicator: View {
+public struct AppStepIndicator: View {
     @Environment(\.theme) private var theme
-    
-    var color: Color? = nil
-    var totalSteps: Int
-    var currentStep: Int
 
-    var body: some View {
+    public var color: Color? = nil
+    public var totalSteps: Int
+    public var currentStep: Int
+
+    public var body: some View {
         HStack(spacing: 8) {
             ForEach(1 ... totalSteps, id: \.self) { step in
                 Capsule()

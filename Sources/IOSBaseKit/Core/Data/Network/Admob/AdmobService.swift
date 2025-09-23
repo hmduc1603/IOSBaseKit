@@ -5,26 +5,25 @@
 //  Created by Dennis Hoang on 28/08/2024.
 //
 
+import AppTrackingTransparency
 import Combine
 import Factory
 import FirebaseAnalytics
 import Foundation
 @preconcurrency import GoogleMobileAds
-import UserMessagingPlatform
-import AppTrackingTransparency
+@preconcurrency import UserMessagingPlatform
 
-class AdmobService {
-    @Injected(\.remoteConfigService) private var remoteConfigService
+public class AdmobService: @unchecked Sendable {
+    public static let shared = AdmobService()
 
-    static let shared = AdmobService()
-
-    var config: AdConfig?
+    public var config: AdConfig?
 
     private var interstitialAd: InterstitialAd?
     private var adDelegate: AdDelegate?
     private var openAd: AppOpenAd?
+    private var rewardedAd: RewardedAd?
 
-    func setup() async throws {
+    public func setup(_ config: AdConfig) async throws {
         print("AdmobService: setup")
         guard !UserDefaults.standard.isPremium else {
             return
@@ -41,20 +40,23 @@ class AdmobService {
         /// Show consent form first
         await requestConsentForm()
 
-        config = remoteConfigService.adConfig
+        self.config = config
         if !UserDefaults.standard.isPremium {
-            await preloadInterstitial()
             await preloadAppOpenAd()
+            Task {
+                await preloadInterstitial()
+                await preloadRewardedAd()
+            }
         }
     }
 
-    func preloadInterstitialSync() {
+    public func preloadInterstitialSync() {
         Task {
             await preloadInterstitial()
         }
     }
 
-    func preloadInterstitial() async {
+    public func preloadInterstitial() async {
         guard config?.enableInterstitialAd == true, !UserDefaults.standard.isPremium else {
             return
         }
@@ -73,7 +75,61 @@ class AdmobService {
         }
     }
 
-    func preloadOpenSync() {
+    // MARK: - Preload Rewarded Ad
+
+    public func preloadRewardedAd() async {
+        guard config?.enableRewardAd == true, !UserDefaults.standard.isPremium else {
+            return
+        }
+        let adUnitId = AdUnitConfig.getAdUnitConfig().rewardId
+        await withUnsafeContinuation { continuation in
+            RewardedAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
+                if let error {
+                    print("Failed to load rewarded ad: \(error.localizedDescription)")
+                    continuation.resume()
+                    return
+                }
+                print("AdmobService: Preloaded Rewarded Ad!")
+                self?.rewardedAd = ad
+                continuation.resume()
+            }
+        }
+    }
+
+    // MARK: - Show Rewarded Ad
+
+    @MainActor
+    public func showRewardedAd(completion: @escaping (Bool) -> Void) {
+        guard config?.enableRewardAd == true, !UserDefaults.standard.isPremium else {
+            completion(false)
+            return
+        }
+
+        guard let ad = rewardedAd else {
+            print("Rewarded ad not ready")
+            completion(false)
+            return
+        }
+
+        ad.fullScreenContentDelegate = AdDelegate(
+            onAdDismissed: { [weak self] in
+                print("Rewarded ad dismissed")
+                Task { await self?.preloadRewardedAd() }
+                completion(false)
+            },
+            onAdFailedToPresent: { [weak self] error in
+                print("Rewarded ad failed to present: \(error.localizedDescription)")
+                Task { await self?.preloadRewardedAd() }
+                completion(false)
+            }
+        )
+        ad.present(from: nil) {
+            Task { await self.preloadRewardedAd() }
+            completion(true)
+        }
+    }
+
+    public func preloadOpenSync() {
         do {
             Task {
                 await preloadAppOpenAd()
@@ -81,7 +137,7 @@ class AdmobService {
         }
     }
 
-    func preloadAppOpenAd() async {
+    public func preloadAppOpenAd() async {
         guard config?.enableOpenAd == true, !UserDefaults.standard.isPremium else {
             return
         }
@@ -100,7 +156,7 @@ class AdmobService {
         }
     }
 
-    func showInterstitial(completion: @escaping () -> Void) {
+    public func showInterstitial(completion: @escaping () -> Void) {
         guard config?.enableInterstitialAd == true, !UserDefaults.standard.isPremium else {
             completion()
             return
@@ -138,7 +194,7 @@ class AdmobService {
         }
     }
 
-    func showOpenAdAsync() async {
+    public func showOpenAdAsync() async {
         guard config?.enableOpenAd == true, !UserDefaults.standard.isPremium else {
             return
         }
@@ -170,7 +226,7 @@ class AdmobService {
         }
     }
 
-    func showOpenAd(completion: (() -> Void)? = nil) {
+    public func showOpenAd(completion: (() -> Void)? = nil) {
         guard config?.enableOpenAd == true, !UserDefaults.standard.isPremium else {
             completion?()
             return
@@ -227,57 +283,64 @@ class AdDelegate: NSObject, FullScreenContentDelegate {
 
 // MARK: Consent
 
-extension AdmobService {
+public extension AdmobService {
     func requestConsentForm() async {
         if ConsentInformation.shared.consentStatus == .required {
             return await withCheckedContinuation { continuation in
-                            // Request consent information
-                                let parameters = RequestParameters()
-                                parameters.isTaggedForUnderAgeOfConsent = false
-                                ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
-                                    if let error = error {
-                                        print("Failed to request consent info: \(error.localizedDescription)")
-                                        continuation.resume()
-                                        return
-                                    }
-                                    
-                                    // Check if form is available
-                                    let formStatus = ConsentInformation.shared.formStatus
-                                    if formStatus == .available {
-                                        // Load and present the form
-                                        ConsentForm.load { form, error in
-                                            if let error = error {
-                                                print("Failed to load consent form: \(error.localizedDescription)")
-                                                continuation.resume()
-                                                return
-                                            }
-                                            
-                                            guard let form = form else {
-                                                continuation.resume()
-                                                return
-                                            }
-                                            
-                                            form.present(from: UIApplication.shared.keyWindow?.rootViewController) { dismissError in
-                                                if let dismissError = dismissError {
-                                                    print("Consent form dismissed with error: \(dismissError.localizedDescription)")
-                                                } else {
-                                                    print("Consent form dismissed successfully")
-                                                }
-                                                
-                                                // Check consent status after dismissal
-                                                let status = ConsentInformation.shared.consentStatus
-                                                print("Consent status: \(status.rawValue)")
-                                                
-                                                continuation.resume()
-                                            }
+                // Request consent information
+                let parameters = RequestParameters()
+                parameters.isTaggedForUnderAgeOfConsent = false
+                ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
+                    if let error = error {
+                        print("Failed to request consent info: \(error.localizedDescription)")
+                        continuation.resume()
+                        return
+                    }
+
+                    // Check if form is available
+                    let formStatus = ConsentInformation.shared.formStatus
+                    if formStatus == .available {
+                        // Load and present the form
+                        ConsentForm.load { form, error in
+                            if let error = error {
+                                print("Failed to load consent form: \(error.localizedDescription)")
+                                continuation.resume()
+                                return
+                            }
+
+                            guard let form = form else {
+                                continuation.resume()
+                                return
+                            }
+
+                            Task { @MainActor in
+                                if let windowScene = UIApplication.shared.connectedScenes
+                                    .compactMap({ $0 as? UIWindowScene })
+                                    .first(where: { $0.activationState == .foregroundActive }),
+                                    let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
+                                {
+                                    form.present(from: rootVC) { dismissError in
+                                        if let dismissError = dismissError {
+                                            print("Consent form dismissed with error: \(dismissError.localizedDescription)")
+                                        } else {
+                                            print("Consent form dismissed successfully")
                                         }
-                                    } else {
-                                        print("Consent form not available")
+
+                                        let status = ConsentInformation.shared.consentStatus
+                                        print("Consent status: \(status.rawValue)")
                                         continuation.resume()
                                     }
+                                } else {
+                                    continuation.resume()
                                 }
-                            
+                            }
                         }
+                    } else {
+                        print("Consent form not available")
+                        continuation.resume()
+                    }
+                }
+            }
         } else {
             await ATTrackingManager.requestTrackingAuthorization()
         }

@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-struct AppBottomSheet<Content: View>: View {
+public struct AppBottomSheet<Content: View>: View {
     @Environment(\.theme) private var theme: AppTheme
-    @Binding var isPresented: Bool
-    var sheetColor: Color? = nil
-    var cornerRadius: CGFloat = 20
-    let content: Content
+    @Binding public var isPresented: Bool
+    public var sheetColor: Color? = nil
+    public var cornerRadius: CGFloat = 20
+    public let content: Content
 
-    init(
+    public init(
         isPresented: Binding<Bool>,
         sheetColor: Color? = nil,
         cornerRadius: CGFloat = 20,
@@ -25,7 +25,7 @@ struct AppBottomSheet<Content: View>: View {
         self.content = content()
     }
 
-    var body: some View {
+    public var body: some View {
         ZStack {
             // Dim background
             if isPresented {

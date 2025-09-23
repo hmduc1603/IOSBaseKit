@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum EnvConfig: String {
+public enum EnvConfig: String {
     case termUrl
     case privacyUrl
     case debugPremium
@@ -19,7 +19,7 @@ enum EnvConfig: String {
     case rewardAdUnitId
     case interstitialAdUnitId
 
-    static var isDebug: Bool {
+    public static var isDebug: Bool {
         #if DEBUG
         return true
         #else
@@ -49,7 +49,7 @@ enum EnvConfig: String {
         return envValue
     }
 
-    var envValue: Any {
+    public var envValue: Any {
         guard let value = envDictionary.object(forKey: self.rawValue) else {
             fatalError("Couldn't find value for \(self.rawValue) in plist")
         }

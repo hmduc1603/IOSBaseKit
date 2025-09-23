@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
     var capitalizedFirstLetter: String {
         self
             .split(separator: "_")
@@ -16,12 +16,12 @@ extension String {
     }
 }
 
-
-extension String {
+public extension String {
     func unescapedUnicode() -> String {
         let temp = "\"\(self)\"" /// wrap in quotes so JSON decoder can parse it
         if let data = temp.data(using: .utf8),
-           let decoded = try? JSONDecoder().decode(String.self, from: data) {
+           let decoded = try? JSONDecoder().decode(String.self, from: data)
+        {
             return decoded
         }
         return self

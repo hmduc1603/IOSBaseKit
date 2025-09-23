@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct AdUnitConfig: Codable {
-    let adId: String
-    let bannerId: String
-    let appOpenId: String
-    let rewardId: String
-    let interstitialId: String
+public struct AdUnitConfig: Codable {
+    public let adId: String
+    public let bannerId: String
+    public let appOpenId: String
+    public let rewardId: String
+    public let interstitialId: String
 
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case adId
         case bannerId
         case appOpenId
@@ -22,7 +22,7 @@ struct AdUnitConfig: Codable {
         case interstitialId
     }
 
-    init(
+    public init(
         adId: String,
         bannerId: String,
         appOpenId: String,
@@ -37,7 +37,7 @@ struct AdUnitConfig: Codable {
     }
 
     // Initialize from a JSON dictionary
-    init?(json: [String: Any]) {
+    public init?(json: [String: Any]) {
         guard let adId = json["adId"] as? String,
               let bannerId = json["bannerId"] as? String,
               let appOpenId = json["appOpenId"] as? String,
@@ -54,7 +54,7 @@ struct AdUnitConfig: Codable {
     }
 
     // Convert to a JSON dictionary
-    func toJson() -> [String: Any] {
+    public func toJson() -> [String: Any] {
         [
             "adId": adId,
             "bannerId": bannerId,
@@ -65,12 +65,12 @@ struct AdUnitConfig: Codable {
     }
 
     // Convert to JSON data
-    func toJsonData() -> Data? {
+    public func toJsonData() -> Data? {
         try? JSONSerialization.data(withJSONObject: toJson(), options: .prettyPrinted)
     }
 
     // Create an instance from JSON data
-    static func fromJsonData(_ data: Data) -> Self? {
+    public static func fromJsonData(_ data: Data) -> Self? {
         guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
             return nil
         }
@@ -78,7 +78,7 @@ struct AdUnitConfig: Codable {
     }
 }
 
-extension AdUnitConfig {
+public extension AdUnitConfig {
     static func getAdUnitConfig() -> AdUnitConfig {
         AdUnitConfig(adId: EnvConfig.appUnitId.envValue as? String ?? "",
                      bannerId: EnvConfig.bannerAdUnitId.envValue as? String ?? "",

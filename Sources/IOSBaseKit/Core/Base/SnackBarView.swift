@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct SnackbarModifier: ViewModifier {
+public struct SnackbarModifier: ViewModifier {
     @Environment(\.theme) private var theme
-    @Binding var isShowing: Bool
-    var message: () -> String
+    @Binding public var isShowing: Bool
+    public var message: () -> String
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         ZStack {
             content
             VStack {
@@ -47,7 +47,7 @@ struct SnackbarModifier: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     func snackbar(
         isShowing: Binding<Bool>,
         message: @escaping () -> String

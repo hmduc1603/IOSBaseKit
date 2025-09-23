@@ -10,8 +10,8 @@ import GoogleMobileAds
 import SwiftUI
 import UIKit
 
-struct BannerAdView: View {
-    var body: some View {
+public struct BannerAdView: View {
+    public var body: some View {
         VStack {
             BannerAdViewWrapper()
                 .widthExpanded()
@@ -22,10 +22,8 @@ struct BannerAdView: View {
 }
 
 private struct BannerAdViewWrapper: UIViewRepresentable {
-    @Injected(\.admobService) private var admobService
-
     func makeUIView(context _: Context) -> BannerView {
-        guard admobService.config?.enableBannerAd == true else {
+        guard AdmobService.shared.config?.enableBannerAd == true else {
             print("Banner Ad is not enable by remote config")
             return BannerView(frame: CGRect.zero)
         }
