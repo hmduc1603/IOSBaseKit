@@ -18,6 +18,11 @@ public class AdmobService: @unchecked Sendable {
 
     public var config: AdConfig?
 
+    private var bannerId: String?
+    private var appOpenId: String?
+    private var rewardId: String?
+    private var interstitialId: String?
+
     private var interstitialAd: InterstitialAd?
     private var adDelegate: AdDelegate?
     private var openAd: AppOpenAd?
@@ -35,6 +40,14 @@ public class AdmobService: @unchecked Sendable {
                 // Call continuation.resume() to indicate the async operation is complete.
                 continuation.resume()
             }
+        }
+
+        if config.forceTestAd == true {
+            print("AdmobService: Force Test Ad!")
+            appOpenId = AdUnitConfig.getDebugAdUnitConfig().appOpenId
+            interstitialId = AdUnitConfig.getDebugAdUnitConfig().interstitialId
+            bannerId = AdUnitConfig.getDebugAdUnitConfig().bannerId
+            rewardId = AdUnitConfig.getDebugAdUnitConfig().rewardId
         }
 
         /// Show consent form first
@@ -60,7 +73,7 @@ public class AdmobService: @unchecked Sendable {
         guard config?.enableInterstitialAd == true, !UserDefaults.standard.isPremium else {
             return
         }
-        let adUnitId = AdUnitConfig.getAdUnitConfig().interstitialId
+        let adUnitId = interstitialId ?? AdUnitConfig.getAdUnitConfig().interstitialId
         await withUnsafeContinuation { continuation in
             InterstitialAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
                 if let error {
@@ -81,7 +94,7 @@ public class AdmobService: @unchecked Sendable {
         guard config?.enableRewardAd == true, !UserDefaults.standard.isPremium else {
             return
         }
-        let adUnitId = AdUnitConfig.getAdUnitConfig().rewardId
+        let adUnitId = rewardId ?? AdUnitConfig.getAdUnitConfig().rewardId
         await withUnsafeContinuation { continuation in
             RewardedAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
                 if let error {
@@ -141,7 +154,7 @@ public class AdmobService: @unchecked Sendable {
         guard config?.enableOpenAd == true, !UserDefaults.standard.isPremium else {
             return
         }
-        let adUnitId = AdUnitConfig.getAdUnitConfig().appOpenId
+        let adUnitId = appOpenId ?? AdUnitConfig.getAdUnitConfig().appOpenId
         await withUnsafeContinuation { continuation in
             AppOpenAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
                 if let error {

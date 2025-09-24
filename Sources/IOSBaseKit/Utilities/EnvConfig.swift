@@ -49,8 +49,29 @@ public enum EnvConfig: String {
         return envValue
     }
 
+    private var debugEnvDictionary: NSDictionary {
+        guard let filePath = Bundle.main.path(forResource: "Env", ofType: "plist")
+        else {
+            fatalError("Couldn't find file 'Env.plist'.")
+        }
+        guard let plist = NSDictionary(contentsOfFile: filePath) else {
+            fatalError("Couldn't find file 'Env.plist'.")
+        }
+        guard let envValue = plist.object(forKey: "debug") as? NSDictionary else {
+            fatalError("Couldn't find env key in plist")
+        }
+        return envValue
+    }
+
     public var envValue: Any {
         guard let value = envDictionary.object(forKey: self.rawValue) else {
+            fatalError("Couldn't find value for \(self.rawValue) in plist")
+        }
+        return value
+    }
+
+    public var debugEnvValue: Any {
+        guard let value = debugEnvDictionary.object(forKey: self.rawValue) else {
             fatalError("Couldn't find value for \(self.rawValue) in plist")
         }
         return value

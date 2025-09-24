@@ -151,10 +151,12 @@ public struct SubscriptionPickerView: View {
 
     public var body: some View {
         VStack(spacing: 15) {
-            Spacer()
-            ForEach(products, id: \.id) { item in
-                buildItemRow(item: item)
+            ScrollView {
+                ForEach(products, id: \.id) { item in
+                    buildItemRow(item: item)
+                }
             }
+            .heightExpanded()
             VStack {
                 if let selectedProduct = selectedProduct,
                    selectedProduct.type == .autoRenewable
@@ -178,6 +180,7 @@ public struct SubscriptionPickerView: View {
                         showLoading = false
                     }
                 }
+                .padding(.bottom, 20)
             }
         }
         .onAppear {

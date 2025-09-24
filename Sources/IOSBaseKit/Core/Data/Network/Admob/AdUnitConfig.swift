@@ -86,4 +86,12 @@ public extension AdUnitConfig {
                      rewardId: EnvConfig.rewardAdUnitId.envValue as? String ?? "",
                      interstitialId: EnvConfig.interstitialAdUnitId.envValue as? String ?? "")
     }
+
+    static func getDebugAdUnitConfig() -> AdUnitConfig {
+        AdUnitConfig(adId: EnvConfig.appUnitId.debugEnvValue as? String ?? "",
+                     bannerId: EnvConfig.bannerAdUnitId.debugEnvValue as? String ?? "",
+                     appOpenId: EnvConfig.openAdUnitId.debugEnvValue as? String ?? "",
+                     rewardId: EnvConfig.rewardAdUnitId.debugEnvValue as? String ?? "",
+                     interstitialId: EnvConfig.interstitialAdUnitId.debugEnvValue as? String ?? "")
+    }
 }
