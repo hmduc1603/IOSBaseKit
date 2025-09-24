@@ -12,6 +12,7 @@ public struct AdConfig: Codable {
     public let enableOpenAd: Bool?
     public let enableBannerAd: Bool?
     public let enableRewardAd: Bool?
+    public let forceTestAd: Bool?
     public let adLimitation: AdLimitation
 
     public enum CodingKeys: String, CodingKey {
@@ -20,6 +21,7 @@ public struct AdConfig: Codable {
         case enableBannerAd
         case enableRewardAd
         case adLimitation
+        case forceTestAd
     }
 
     public init(
@@ -27,6 +29,7 @@ public struct AdConfig: Codable {
         enableOpenAd: Bool,
         enableBannerAd: Bool,
         enableRewardAd: Bool = false,
+        forceTestAd: Bool = false,
         adLimitation: AdLimitation
     ) {
         self.enableInterstitialAd = enableInterstitialAd
@@ -34,6 +37,7 @@ public struct AdConfig: Codable {
         self.enableBannerAd = enableBannerAd
         self.enableRewardAd = enableRewardAd
         self.adLimitation = adLimitation
+        self.forceTestAd = forceTestAd
     }
 
     // Initialize from a JSON dictionary
@@ -43,6 +47,7 @@ public struct AdConfig: Codable {
         self.enableBannerAd = json["enableBannerAd"] as? Bool
         self.enableRewardAd = json["enableRewardAd"] as? Bool
         self.adLimitation = AdLimitation(json: json["adLimitation"] as! [String: Any])!
+        self.forceTestAd = json["forceTestAd"] as? Bool
     }
 
     // Create an instance from JSON data
