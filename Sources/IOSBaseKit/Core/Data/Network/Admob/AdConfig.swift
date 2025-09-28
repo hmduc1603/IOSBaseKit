@@ -12,6 +12,7 @@ public struct AdConfig: Codable {
     public let enableOpenAd: Bool?
     public let enableBannerAd: Bool?
     public let enableRewardAd: Bool?
+    public let numberOfRewardAd: Int
     public let forceTestAd: Bool?
     public let adLimitation: AdLimitation
 
@@ -20,6 +21,7 @@ public struct AdConfig: Codable {
         case enableOpenAd
         case enableBannerAd
         case enableRewardAd
+        case numberOfRewardAd
         case adLimitation
         case forceTestAd
     }
@@ -28,6 +30,7 @@ public struct AdConfig: Codable {
         enableInterstitialAd: Bool,
         enableOpenAd: Bool,
         enableBannerAd: Bool,
+        numberOfRewardAd: Int = 1,
         enableRewardAd: Bool = false,
         forceTestAd: Bool = false,
         adLimitation: AdLimitation
@@ -36,6 +39,7 @@ public struct AdConfig: Codable {
         self.enableOpenAd = enableOpenAd
         self.enableBannerAd = enableBannerAd
         self.enableRewardAd = enableRewardAd
+        self.numberOfRewardAd = numberOfRewardAd
         self.adLimitation = adLimitation
         self.forceTestAd = forceTestAd
     }
@@ -46,6 +50,7 @@ public struct AdConfig: Codable {
         self.enableOpenAd = json["enableOpenAd"] as? Bool
         self.enableBannerAd = json["enableBannerAd"] as? Bool
         self.enableRewardAd = json["enableRewardAd"] as? Bool
+        self.numberOfRewardAd = json["numberOfRewardAd"] as? Int ?? 1
         self.adLimitation = AdLimitation(json: json["adLimitation"] as! [String: Any])!
         self.forceTestAd = json["forceTestAd"] as? Bool
     }

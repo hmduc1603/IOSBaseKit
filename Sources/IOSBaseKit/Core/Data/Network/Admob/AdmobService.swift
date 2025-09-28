@@ -109,10 +109,30 @@ public class AdmobService: @unchecked Sendable {
         }
     }
 
+    @MainActor public func forceShowRewardedAd(completion: @Sendable @escaping (Bool) -> Void) async {
+        guard config?.enableRewardAd == true, !UserDefaults.standard.isPremium else {
+            return
+        }
+        let adUnitId = rewardId ?? AdUnitConfig.getAdUnitConfig().rewardId
+        await withUnsafeContinuation { continuation in
+            RewardedAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
+                if let error {
+                    print("Failed to load rewarded ad: \(error.localizedDescription)")
+                    continuation.resume()
+                    return
+                }
+                print("AdmobService: Preloaded Rewarded Ad!")
+                self?.rewardedAd = ad
+                continuation.resume()
+            }
+        }
+        await showRewardedAd(completion: completion)
+    }
+
     // MARK: - Show Rewarded Ad
 
     @MainActor
-    public func showRewardedAd(completion: @escaping (Bool) -> Void) {
+    public func showRewardedAd(autoPreload: Bool = true, completion: @escaping (Bool) -> Void) {
         guard config?.enableRewardAd == true, !UserDefaults.standard.isPremium else {
             completion(false)
             return
@@ -127,17 +147,19 @@ public class AdmobService: @unchecked Sendable {
         ad.fullScreenContentDelegate = AdDelegate(
             onAdDismissed: { [weak self] in
                 print("Rewarded ad dismissed")
-                Task { await self?.preloadRewardedAd() }
-                completion(false)
             },
             onAdFailedToPresent: { [weak self] error in
                 print("Rewarded ad failed to present: \(error.localizedDescription)")
-                Task { await self?.preloadRewardedAd() }
+                if autoPreload {
+                    Task { await self?.preloadRewardedAd() }
+                }
                 completion(false)
             }
         )
-        ad.present(from: nil) {
-            Task { await self.preloadRewardedAd() }
+        ad.present(from: UIApplication.shared.connectedScenes.first?.inputViewController) {
+            if autoPreload {
+                Task { await self.preloadRewardedAd() }
+            }
             completion(true)
         }
     }
