@@ -52,12 +52,22 @@ public struct AppTextEditor: View {
     public var keyboardType: UIKeyboardType = .default
     public var placeholder: String?
     public var fieldHeight: CGFloat = 100
+    public var borderLineWidth: CGFloat?
+    public var borderLineColor: Color?
+    public var backgroundColor: Color?
 
-    public init(inputText: Binding<String>, keyboardType: UIKeyboardType = .default, placeholder: String? = nil, fieldHeight: CGFloat = 100) {
+    public init(inputText: Binding<String>, borderLineWidth: CGFloat? = nil,
+                borderLineColor: Color? = nil,
+                backgroundColor: Color? = nil,
+                keyboardType: UIKeyboardType = .default, placeholder: String? = nil, fieldHeight: CGFloat = 100)
+    {
         self._inputText = inputText
         self.keyboardType = keyboardType
         self.placeholder = placeholder
         self.fieldHeight = fieldHeight
+        self.borderLineColor = borderLineColor
+        self.backgroundColor = backgroundColor
+        self.borderLineWidth = borderLineWidth
     }
 
     public var body: some View {
@@ -78,7 +88,7 @@ public struct AppTextEditor: View {
             TextEditor(text: $inputText)
                 .frame(height: fieldHeight)
                 .font(theme.textThemeT1.body.font)
-                .background(Color.clear)
+                .background(backgroundColor ?? Color.clear)
                 .tint(theme.btnColor) /// Cursor
                 .foregroundColor(theme.textColor)
                 .keyboardType(keyboardType)
@@ -86,7 +96,7 @@ public struct AppTextEditor: View {
                 .padding(10)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(theme.textColor.opacity(0.5), lineWidth: 1)
+                        .stroke(borderLineColor ?? theme.textColor.opacity(0.5), lineWidth: borderLineWidth ?? 1)
                         .frame(height: fieldHeight)
                 )
                 .scrollContentBackground(.hidden)

@@ -12,6 +12,11 @@ public struct AppErrorView: View {
     public var errorMessage: String?
     public var onRetry: (() -> Void)? = nil
 
+    public init(errorMessage: String? = nil, onRetry: (() -> Void)? = nil) {
+        self.errorMessage = errorMessage
+        self.onRetry = onRetry
+    }
+
     public var body: some View {
         VStack {
             Text(errorMessage ?? "Something wrong happned, please try again!").themed()

@@ -40,7 +40,7 @@ public struct AppTheme: Sendable {
             primary: AppColor.shared.primaryColor,
             secondary: AppColor.shared.secondaryColor,
             textColor: AppColor.shared.textColor,
-            textBtnColor: AppColor.shared.textColor,
+            textBtnColor: AppColor.shared.textButtonColor,
             cardColor: AppColor.shared.cardColor,
             btnColor: AppColor.shared.buttonColor,
             splashColor: AppColor.shared.primaryColor,

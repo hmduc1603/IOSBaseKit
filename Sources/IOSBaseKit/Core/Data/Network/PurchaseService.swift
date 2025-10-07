@@ -39,7 +39,7 @@ public final class PurchaseService: @unchecked Sendable {
         } catch { print("Load error: \(error)") }
     }
 
-    public func hasActiveEntitlement() async -> Bool {
+    public func hasActiveEntitlement() async -> (Bool) {
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result {
                 switch transaction.productType {
@@ -58,6 +58,24 @@ public final class PurchaseService: @unchecked Sendable {
         }
         UserDefaults.standard.setIsPremium(isPremium: false)
         return false
+    }
+
+    public func getCurrentTransaction() async -> (id: String, exp: Date?, product: String)? {
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result {
+                switch transaction.productType {
+                case .autoRenewable:
+                    print("✅ Active subscription: \(transaction.productID)")
+                    return (transaction.id.description, transaction.expirationDate, transaction.productID)
+                case .nonConsumable:
+                    print("✅ Purchased one-time IAP: \(transaction.productID)")
+                    return (transaction.id.description, transaction.expirationDate, transaction.productID)
+                default:
+                    break
+                }
+            }
+        }
+        return nil
     }
 
     /// Call this function to start observing transactions
@@ -101,6 +119,7 @@ public final class PurchaseService: @unchecked Sendable {
                     self.recorder?.recordPurchase(
                         productId: transaction.productID,
                         transactionId: transaction.id.description,
+                        expirationDate: transaction.expirationDate,
                         price: product.displayPrice,
                         priceAsNum: Double(truncating: product.price as NSNumber),
                         currency: product.priceFormatStyle.currencyCode,
@@ -156,6 +175,7 @@ public protocol PurchaseRecordPotocol {
     func recordPurchase(
         productId: String,
         transactionId: String,
+        expirationDate: Date?,
         price: String,
         priceAsNum: Double,
         currency: String,

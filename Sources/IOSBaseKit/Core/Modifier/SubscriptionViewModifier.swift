@@ -94,11 +94,22 @@ private struct SubscriptionFrameView<Content: View>: View {
                                 .resizable()
                                 .renderingMode(.template)
                                 .frame(width: 26, height: 26)
-                                .foregroundColor(theme.btnColor)
+                                .foregroundColor(AppColor.shared.subscriptionCloseButtonColor)
                         }
                     }
                     .padding(.top, 20)
-                    VStack {
+                    ZStack {
+                        VStack {
+                            VStack {
+                                VStack {}
+                                    .frame(width: 80, height: 80)
+                            }
+                            .padding(.all, 15)
+                        }
+                        .background(AppColor.shared.subscriptionIconBackgroundColor)
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+                        .rotationEffect(.degrees(25))
                         VStack {
                             Image("ic_app")
                                 .resizable()
@@ -107,10 +118,6 @@ private struct SubscriptionFrameView<Content: View>: View {
                         }
                         .padding(.all, 15)
                     }
-                    .background(AppColor.shared.subscriptionIconBackgroundColor)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
-                    .rotationEffect(.degrees(25))
                     Text("Get Premium")
                         .themed(style: theme.textThemeT1.header1
                             .copyWith(color: theme.btnColor)
@@ -190,48 +197,51 @@ public struct SubscriptionPickerView: View {
 
     private func buildItemRow(item: Product) -> some View {
         HStack {
-            VStack {
-                HStack {
-                    VStack(spacing: 4) {
-                        Text(item.displayName)
-                            .themed(style: theme.textThemeT1.title
-                                .copyWith(color: .black)
-                            )
-                            .leadingFullWidth()
-                        Text(item.displayPrice)
-                            .themed(style: theme.textThemeT1.body
-                                .copyWith(color: .black)
-                            )
-                            .leadingFullWidth()
+            HStack {
+                VStack {
+                    HStack {
+                        VStack(spacing: 4) {
+                            Text(item.displayName)
+                                .themed(style: theme.textThemeT1.title
+                                    .copyWith(color: .black)
+                                )
+                                .leadingFullWidth()
+                            Text(item.displayPrice)
+                                .themed(style: theme.textThemeT1.body
+                                    .copyWith(color: .black)
+                                )
+                                .leadingFullWidth()
+                        }
+                        Image(
+                            systemName: item == selectedProduct ? "checkmark.circle.fill" : "circle"
+                        )
+                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundColor(theme.btnColor)
+                        .frame(width: 20, height: 20)
                     }
-                    Image(
-                        systemName: item == selectedProduct ? "checkmark.circle.fill" : "circle"
-                    )
-                    .resizable()
-                    .renderingMode(.template)
-                    .foregroundColor(theme.btnColor)
-                    .frame(width: 20, height: 20)
+                    Divider()
+                        .foregroundColor(.black.opacity(1))
+                    Text(item.description)
+                        .themed(style: theme.textThemeT1.body
+                            .copyWith(color: .black)
+                        )
+                        .leadingFullWidth()
                 }
-                Divider()
-                    .foregroundColor(.black.opacity(1))
-                Text(item.description)
-                    .themed(style: theme.textThemeT1.body
-                        .copyWith(color: .black)
-                    )
-                    .leadingFullWidth()
+                .widthExpanded()
+                .padding(.all, 15)
             }
-            .widthExpanded()
-            .padding(.all, 15)
+            .background(.white)
+            .cornerRadiusWithBorder(
+                radius: 12,
+                borderLineWidth: item == selectedProduct ? 2 : 0,
+                borderColor: theme.btnColor,
+            )
+            .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 0)
+            .onTapGesture {
+                selectedProduct = item
+            }
         }
-        .background(.white)
-        .cornerRadiusWithBorder(
-            radius: 12,
-            borderLineWidth: item == selectedProduct ? 2 : 0,
-            borderColor: theme.btnColor,
-        )
-        .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 0)
-        .onTapGesture {
-            selectedProduct = item
-        }
+        .padding(.horizontal, 4)
     }
 }

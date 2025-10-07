@@ -8,16 +8,32 @@
 import _AVKit_SwiftUI
 import SwiftUI
 
-struct AppVideoPlayerView: View {
+public struct AppVideoPlayerView: View {
     @Environment(\.theme) private var theme
     @State private var player: AVPlayer?
 
-    var url: URL
-    var isLoop: Bool = false
-    var proxy: GeometryProxy
-    var enableOverlayControls: Bool = false
-    var enableScaleToFit: Bool = false
-    var cornerRadius: CGFloat = 12
+    public var url: URL
+    public var isLoop: Bool = false
+    public var proxy: GeometryProxy
+    public var enableOverlayControls: Bool = false
+    public var enableScaleToFit: Bool = false
+    public var cornerRadius: CGFloat = 12
+
+    public init(
+        url: URL,
+        isLoop: Bool,
+        proxy: GeometryProxy,
+        enableOverlayControls: Bool,
+        enableScaleToFit: Bool,
+        cornerRadius: CGFloat,
+    ) {
+        self.url = url
+        self.isLoop = isLoop
+        self.proxy = proxy
+        self.enableOverlayControls = enableOverlayControls
+        self.enableScaleToFit = enableScaleToFit
+        self.cornerRadius = cornerRadius
+    }
 
     private func initPlayer(url: URL) {
         player = AVPlayer(url: url)
@@ -29,13 +45,15 @@ struct AppVideoPlayerView: View {
                                                    object: player?.currentItem,
                                                    queue: .main)
             { _ in
-                player?.seek(to: .zero)
-                player?.play()
+                Task { @MainActor in
+                    player?.seek(to: .zero)
+                    player?.play()
+                }
             }
         }
     }
 
-    var body: some View {
+    public var body: some View {
         VStack {
             if let player = player {
                 if enableScaleToFit {

@@ -59,12 +59,40 @@ public struct NavigationBarViewModifier: ViewModifier {
     public var trailingTitle: String?
     public var onTrailingTap: (() -> Void)? = nil
 
+    private func enableSwipeBack() {
+        /// Grab the underlying UINavigationController
+        if let root = UIApplication.shared.connectedScenes
+            .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
+            .first?.rootViewController
+        {
+            if let nav = findNavController(from: root) {
+                nav.interactivePopGestureRecognizer?.isEnabled = true
+                nav.interactivePopGestureRecognizer?.delegate = nil
+            }
+        }
+    }
+
+    private func findNavController(from vc: UIViewController) -> UINavigationController? {
+        if let nav = vc as? UINavigationController {
+            return nav
+        }
+        for child in vc.children {
+            if let found = findNavController(from: child) {
+                return found
+            }
+        }
+        return nil
+    }
+
     public func body(content: Content) -> some View {
         content
-            .navigationBarBackButtonHidden(true)
+            .onAppear {
+                enableSwipeBack()
+            }
+            .navigationBarBackButtonHidden()
             .toolbarRole(.editor)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
                         navigator.path.removeLast()
                     }) {
@@ -103,4 +131,3 @@ public extension View {
         modifier(NavigationBarViewModifier(title: title, trailingTitle: trailingTitle, onTrailingTap: onTrailingTap))
     }
 }
-

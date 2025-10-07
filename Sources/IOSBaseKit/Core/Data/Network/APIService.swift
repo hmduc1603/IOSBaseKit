@@ -14,8 +14,10 @@ public class APIService {
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
         headers: HTTPHeaders? = nil,
+        timeoutInterval: TimeInterval?,
     ) -> URLRequest {
         var request = URLRequest(url: URL(string: url)!)
+        request.timeoutInterval = timeoutInterval ?? 60
         request.method = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         headers?.forEach { header in
@@ -32,6 +34,7 @@ public class APIService {
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
         headers: HTTPHeaders? = nil,
+        timeoutInterval: TimeInterval? = nil,
     ) async throws -> T {
         return try await withCheckedThrowingContinuation { continuation in
             let request = createURLRequest(
@@ -39,6 +42,7 @@ public class APIService {
                 method: method,
                 parameters: parameters,
                 headers: headers,
+                timeoutInterval: timeoutInterval,
             )
             AF.request(request)
                 .validate()
@@ -58,7 +62,20 @@ public class APIService {
                             continuation.resume(throwing: AFError.responseValidationFailed(reason: .dataFileNil))
                         }
                     case .failure(let error):
-                        continuation.resume(throwing: error)
+                        if let data = response.data,
+                           let serverMessage = String(data: data, encoding: .utf8)
+                        {
+                            print("APIService: Server Error \(response.response?.statusCode ?? 0) - \(serverMessage)")
+                            /// Optionally create a custom error
+                            let customError = NSError(
+                                domain: "APIService.ServerError",
+                                code: response.response?.statusCode ?? -1,
+                                userInfo: [NSLocalizedDescriptionKey: serverMessage]
+                            )
+                            continuation.resume(throwing: customError)
+                        } else {
+                            continuation.resume(throwing: error)
+                        }
                     }
                 }
         }
@@ -69,6 +86,7 @@ public class APIService {
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
         headers: HTTPHeaders? = nil,
+        timeoutInterval: TimeInterval? = nil,
     ) async throws -> Data? {
         return try await withCheckedThrowingContinuation { continuation in
             let request = createURLRequest(
@@ -76,6 +94,7 @@ public class APIService {
                 method: method,
                 parameters: parameters,
                 headers: headers,
+                timeoutInterval: timeoutInterval,
             )
             AF.request(request)
                 .validate()
@@ -95,6 +114,7 @@ public class APIService {
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
         headers: HTTPHeaders? = nil,
+        timeoutInterval: TimeInterval? = nil,
         onChunk: @escaping (Data) -> Void,
         completion: @escaping (Error?) -> Void
     ) {
@@ -103,6 +123,7 @@ public class APIService {
             method: method,
             parameters: parameters,
             headers: headers,
+            timeoutInterval: timeoutInterval,
         )
         AF.streamRequest(request)
             .responseStream { stream in

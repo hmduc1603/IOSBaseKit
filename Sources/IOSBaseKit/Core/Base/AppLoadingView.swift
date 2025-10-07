@@ -25,16 +25,21 @@ public struct AppLoadingHUD: View {
     }
 }
 
-struct AppLoadingView: View {
+public struct AppLoadingView: View {
     @Environment(\.theme) private var theme
-    var message: String?
+    public var message: String?
 
-    var body: some View {
+    public init(message: String? = nil) {
+        self.message = message
+    }
+
+    public var body: some View {
         VStack {
             AppLoadingIndicator()
             if message != nil {
                 Spacer().frame(height: 30)
                 Text(message!).themed()
+                    .multilineTextAlignment(.center)
             }
         }
     }

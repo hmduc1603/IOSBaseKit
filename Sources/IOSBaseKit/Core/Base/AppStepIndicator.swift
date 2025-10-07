@@ -12,6 +12,12 @@ public struct AppStepIndicator: View {
     public var color: Color? = nil
     public var totalSteps: Int
     public var currentStep: Int
+    
+    public init(color: Color? = nil, totalSteps: Int, currentStep: Int) {
+        self.color = color
+        self.totalSteps = totalSteps
+        self.currentStep = currentStep
+    }
 
     public var body: some View {
         HStack(spacing: 8) {

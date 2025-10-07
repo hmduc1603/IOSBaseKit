@@ -58,6 +58,10 @@ extension AppColor {
         getColorValue(key: "textColor")
     }
 
+    var textButtonColor: Color {
+        getColorValue(key: "textButtonColor")
+    }
+
     var subscriptionIconBackgroundColor: Color {
         getColorValue(key: "subscriptionIconBackgroundColor")
     }
@@ -67,5 +71,9 @@ extension AppColor {
             fatalError("Couldn't find value for subscriptionGradientColors in plist")
         }
         return values.map { Color(hexString: $0) }
+    }
+
+    var subscriptionCloseButtonColor: Color {
+        getColorValue(key: "subscriptionCloseButtonColor")
     }
 }
