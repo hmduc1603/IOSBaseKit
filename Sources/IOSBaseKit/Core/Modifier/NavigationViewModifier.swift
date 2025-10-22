@@ -130,4 +130,74 @@ public extension View {
     ) -> some View {
         modifier(NavigationBarViewModifier(title: title, trailingTitle: trailingTitle, onTrailingTap: onTrailingTap))
     }
+
+    func setupCustomNavigationBar(
+        title: String,
+        trailing: @escaping () -> some View
+    ) -> some View {
+        modifier(CustomNavigationBarViewModifier(title: title, trailing: trailing))
+    }
+}
+
+public struct CustomNavigationBarViewModifier<Trailing: View>: ViewModifier {
+    @Environment(\.theme) private var theme
+    @EnvironmentObject private var navigator: Navigator
+
+    public var title: String
+    public var trailing: () -> Trailing
+
+    private func enableSwipeBack() {
+        /// Grab the underlying UINavigationController
+        if let root = UIApplication.shared.connectedScenes
+            .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
+            .first?.rootViewController
+        {
+            if let nav = findNavController(from: root) {
+                nav.interactivePopGestureRecognizer?.isEnabled = true
+                nav.interactivePopGestureRecognizer?.delegate = nil
+            }
+        }
+    }
+
+    private func findNavController(from vc: UIViewController) -> UINavigationController? {
+        if let nav = vc as? UINavigationController {
+            return nav
+        }
+        for child in vc.children {
+            if let found = findNavController(from: child) {
+                return found
+            }
+        }
+        return nil
+    }
+
+    public func body(content: Content) -> some View {
+        content
+            .onAppear {
+                enableSwipeBack()
+            }
+            .navigationBarBackButtonHidden()
+            .toolbarRole(.editor)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        navigator.path.removeLast()
+                    }) {
+                        Image("ic_back")
+                            .resizable()
+                            .renderingMode(.template)
+                            .frame(width: 26, height: 26)
+                            .foregroundColor(theme.btnColor)
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text(title)
+                        .font(.headline)
+                        .themed(style: theme.textThemeT1.body.copyWith(weight: .bold))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    trailing()
+                }
+            }
+    }
 }

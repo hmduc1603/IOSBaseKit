@@ -9,7 +9,8 @@ import SwiftUI
 
 public struct AppPrimaryButton: View {
     @Environment(\.theme) private var theme: AppTheme
-    @Binding public var isButtonEnabled: Bool
+    public var isButtonEnabled: Bool
+    public var widthExpanded: Bool
     public var buttonTitle: String
     public var buttonColor: Color?
     public var textStyle: TextStyle?
@@ -17,14 +18,16 @@ public struct AppPrimaryButton: View {
     public var action: () -> Void
 
     public init(
-        isButtonEnabled: Binding<Bool>? = nil,
+        isButtonEnabled: Bool = true,
+        widthExpanded: Bool = true,
         buttonTitle: String,
         buttonColor: Color? = nil,
         textStyle: TextStyle? = nil,
         buttonHeight: CGFloat? = nil,
         action: @escaping () -> Void
     ) {
-        self._isButtonEnabled = isButtonEnabled ?? .constant(true)
+        self.isButtonEnabled = isButtonEnabled
+        self.widthExpanded = widthExpanded
         self.buttonTitle = buttonTitle
         self.buttonColor = buttonColor
         self.buttonHeight = buttonHeight
@@ -37,11 +40,21 @@ public struct AppPrimaryButton: View {
             action()
         } label: {
             VStack {
-                Text(buttonTitle)
-                    .themed(style: textStyle ?? theme.textThemeT1.button.copyWith(color: theme.textBtnColor))
+                if widthExpanded {
+                    VStack {
+                        Text(buttonTitle)
+                            .themed(style: textStyle ?? theme.textThemeT1.button.copyWith(color: theme.textBtnColor))
+                    }
+                    .widthExpanded()
+                } else {
+                    VStack {
+                        Text(buttonTitle)
+                            .themed(style: textStyle ?? theme.textThemeT1.button.copyWith(color: theme.textBtnColor))
+                    }
+                    .padding(.horizontal, 20)
+                }
             }
             .frame(height: 50)
-            .widthExpanded()
             .background(
                 buttonColor ?? theme.btnColor
             )
