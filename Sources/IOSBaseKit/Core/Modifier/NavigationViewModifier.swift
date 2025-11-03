@@ -28,7 +28,9 @@ public class Navigator: ObservableObject {
 
     @MainActor
     public func pop() {
-        path.removeLast()
+        if !path.isEmpty {
+            path.removeLast()
+        }
     }
 }
 
