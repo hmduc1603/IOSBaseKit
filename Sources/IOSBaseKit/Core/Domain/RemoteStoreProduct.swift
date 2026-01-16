@@ -12,7 +12,18 @@ public struct RemoteStoreProduct: Decodable {
 
     public struct Product: Decodable {
         public let productId: String
+        public var trialProductId: String? = nil
         public var isActive: Bool = false
+        public var priceDesc: String? = nil
+        public var trialDays: Int? = nil
+
+        var isYearly: Bool {
+            productId.contains("yearly")
+        }
+        
+        var hasTrial: Bool {
+            trialProductId != nil
+        }
     }
 
     public var activeProductIds: [String] {

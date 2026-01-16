@@ -12,14 +12,36 @@ import Foundation
 import StoreKit
 import SwiftUI
 
+public struct SubscriptionPackage: Equatable {
+    public static func == (lhs: SubscriptionPackage, rhs: SubscriptionPackage) -> Bool {
+        return lhs.remoteProduct.productId == rhs.remoteProduct.productId
+    }
+
+    public let storeProduct: Product
+    public let remoteProduct: RemoteStoreProduct.Product
+
+    static func demoPackage(storeProduct: Product) -> Self {
+        .init(
+            storeProduct: storeProduct,
+            remoteProduct: .init(
+                productId: storeProduct.id,
+                trialProductId: "com.debug.storekit.trial.monthly",
+                isActive: true,
+                priceDesc: "(test) per month",
+                trialDays: 3,
+            )
+        )
+    }
+}
+
 public final class PurchaseService: @unchecked Sendable {
     public static let shared = PurchaseService()
 
     public var recorder: PurchaseRecordPotocol?
 
     private var transactionObservingTask: Task<Void, Never>?
-    public var products: [Product] = []
-    public var introProducts: [Product] = []
+    public var packages: [SubscriptionPackage] = []
+    public var introPackages: [SubscriptionPackage] = []
 
     public func loadProducts(ids: [String], introIds: [String]) async {
         var productIds = ids + introIds
@@ -30,13 +52,27 @@ public final class PurchaseService: @unchecked Sendable {
             let foundProducts = try await Product.products(for: productIds)
             print("PurchaseService: Loaded \(foundProducts.map { $0.id }).")
             #if DEBUG
-                self.products = foundProducts
-                self.introProducts = foundProducts
+                self.packages = foundProducts.map { SubscriptionPackage.demoPackage(storeProduct: $0) }
+                self.introPackages = foundProducts.map { SubscriptionPackage.demoPackage(storeProduct: $0) }
             #else
-                self.products = foundProducts.filter { ids.contains($0.id) }
-                self.introProducts = foundProducts.filter { introIds.contains($0.id) }
+                let remotes = RemoteConfigServiceImpl.shared.iosProducts
+                self.packages = mergePackage(store: foundProducts, remote: remotes.normal)
+                self.introPackages = mergePackage(store: foundProducts, remote: remotes.intro)
             #endif
         } catch { print("Load error: \(error)") }
+
+        /// Helpers
+        func mergePackage(store: [Product], remote: [RemoteStoreProduct.Product]) -> [SubscriptionPackage] {
+            var packages = [SubscriptionPackage]()
+            for r in remote {
+                if r.isActive,
+                   let s = store.first(where: { $0.id == r.productId })
+                {
+                    packages.append(.init(storeProduct: s, remoteProduct: r))
+                }
+            }
+            return packages
+        }
     }
 
     public func hasActiveEntitlement() async -> (Bool) {
@@ -164,9 +200,10 @@ public extension PurchaseService {
     /// You need to configure StoreKit Configuration
     var debugProductIds: [String] {
         [
-            "com.debug.storekit.lifetime",
-            "com.debug.storekit.weekly",
-            "com.debug.storekit.monthly"
+            ///   "com.debug.storekit.lifetime",
+            ///  "com.debug.storekit.weekly",
+            "com.debug.storekit.monthly",
+            "com.debug.storekit.yearly"
         ]
     }
 }

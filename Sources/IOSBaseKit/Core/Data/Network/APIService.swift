@@ -29,7 +29,7 @@ public class APIService {
         return request
     }
 
-    public static func request<T: Decodable>(
+    public static func request<T: Decodable & Sendable>(
         _ url: String,
         method: HTTPMethod = .get,
         parameters: Parameters? = nil,
