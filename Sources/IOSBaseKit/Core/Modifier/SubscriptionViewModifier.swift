@@ -31,7 +31,7 @@ public struct SubscriptionViewModifier: ViewModifier {
                 SubscriptionFrameView { showLoading in
                     SubscriptionPickerView(
                         isIntroSub: false,
-                        products: PurchaseService.shared.packages,
+                        packages: PurchaseService.shared.packages,
                         showLoading: showLoading
                     )
                 }
@@ -42,7 +42,7 @@ public struct SubscriptionViewModifier: ViewModifier {
                 SubscriptionFrameView { showLoading in
                     SubscriptionPickerView(
                         isIntroSub: true,
-                        products: PurchaseService.shared.introPackages,
+                        packages: PurchaseService.shared.introPackages,
                         showLoading: showLoading
                     )
                 }
@@ -84,7 +84,7 @@ private struct SubscriptionFrameView<Content: View>: View {
                     .frame(height: proxy.frame(in: .global).height * 0.7)
                     Spacer()
                 }
-                VStack(spacing: 20) {
+                VStack(spacing: 10) {
                     HStack {
                         Spacer()
                         Button {
@@ -102,7 +102,7 @@ private struct SubscriptionFrameView<Content: View>: View {
                         VStack {
                             VStack {
                                 VStack {}
-                                    .frame(width: 80, height: 80)
+                                    .frame(width: 60, height: 60)
                             }
                             .padding(.all, 15)
                         }
@@ -114,7 +114,7 @@ private struct SubscriptionFrameView<Content: View>: View {
                             Image("ic_app")
                                 .resizable()
                                 .renderingMode(.original)
-                                .frame(width: 80, height: 80)
+                                .frame(width: 60, height: 60)
                         }
                         .padding(.all, 15)
                     }
@@ -124,8 +124,9 @@ private struct SubscriptionFrameView<Content: View>: View {
                         )
                         .padding(.top, 20)
                     buildFeatureList()
-                    Spacer()
+                        .padding(.bottom, 10)
                     content($showLoading)
+                        .expanded()
                 }
                 .padding(.horizontal, 20)
                 if showLoading {
@@ -150,180 +151,96 @@ public struct SubscriptionPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
 
-    @State private var selectedProduct: SubscriptionPackage?
-    @State private var isTrialEnable: Bool = true
+    @State private var selectedPackage: SubscriptionPackage?
 
     public var isIntroSub: Bool
-    public var products: [SubscriptionPackage]
+    public var packages: [SubscriptionPackage]
     @Binding public var showLoading: Bool
-
-    private func buildTrialToogleView() -> some View {
-        HStack {
-            HStack {
-                Text("Free Trial Enabled")
-                    .font(Font.system(size: 15, design: .rounded))
-                    .foregroundColor(.black)
-                Spacer()
-                Toggle("", isOn: $isTrialEnable)
-                    .tint(theme.btnColor)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-        }
-        .background(.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 0)
-        .disabled(selectedProduct?.remoteProduct.hasTrial == false)
-        .opacity(selectedProduct?.remoteProduct.hasTrial == true ? 1 : 0.2)
-    }
 
     public var body: some View {
         VStack(spacing: 15) {
             ScrollView {
-                ForEach(products, id: \.remoteProduct.productId) { item in
+                ForEach(packages, id: \.storeProduct) { item in
                     buildItemRow(item: item)
                 }
             }
             .heightExpanded()
-            VStack(spacing: 12) {
-                if products.contains(where: { $0.remoteProduct.trialProductId != nil }) {
-                    buildTrialToogleView()
+            VStack {
+                if let selectedPackage = selectedPackage,
+                   selectedPackage.storeProduct.type == .autoRenewable
+                {
+                    Text("Plan automatically renews for \(selectedPackage.storeProduct.displayPrice) until cancelled")
+                        .themed(style: theme.textThemeT1.small.copyWith(
+                            color: .black.opacity(0.5)
+                        ))
                 }
                 AppPrimaryButton(
-                    buttonTitle: "Continue")
+                    buttonTitle: selectedPackage?.remoteProduct.hasTrial == true ? "Get 3 Days Free" : "Continue")
                 {
                     Task { @MainActor in
-                        guard let product = selectedProduct else {
+                        guard let product = selectedPackage?.storeProduct else {
                             return
                         }
                         showLoading = true
-                        var finalStoreProduct = product.storeProduct
-                        if product.remoteProduct.hasTrial && isTrialEnable,
-                           let trialProductId = product.remoteProduct.trialProductId,
-                           let trialStoreProduct = try? await Product.products(for: [trialProductId]).first
-                        {
-                            /// Get trial product
-                            finalStoreProduct = trialStoreProduct
-                        }
-                        if await PurchaseService.shared.purchase(
-                            product: finalStoreProduct,
-                            isIntroSub: isIntroSub
-                        ) {
+                        if await PurchaseService.shared.purchase(product: product, isIntroSub: isIntroSub) {
                             dismiss()
                         }
                         showLoading = false
                     }
                 }
-                if let selectedProduct = selectedProduct,
-                   selectedProduct.storeProduct.type == .autoRenewable
-                {
-                    Text("Plan automatically renews for \(selectedProduct.storeProduct.displayPrice) until cancelled")
-                        .themed(style: theme.textThemeT1.small.copyWith(
-                            color: .black.opacity(0.5)
-                        ))
-                }
+                .padding(.bottom, 20)
             }
         }
         .onAppear {
-            selectedProduct = PurchaseService.shared.introPackages.first
+            selectedPackage = PurchaseService.shared.packages.last
         }
     }
 
     private func buildItemRow(item: SubscriptionPackage) -> some View {
-        func buildYearlyRow(item: SubscriptionPackage) -> some View {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.storeProduct.displayName)
-                        .themed(style: theme.textThemeT1.title
-                            .copyWith(color: .black)
-                        )
-                    Text(item.storeProduct.displayPrice)
-                        .font(Font.system(size: 12, design: .rounded).weight(.light))
-                        .foregroundColor(.gray)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(item.storeProduct.priceFormatStyle.format(item.storeProduct.price / 12))
-                        .font(Font.system(size: 15, design: .rounded).weight(.bold))
-                        .foregroundColor(.black)
-                    Text("per month")
-                        .font(Font.system(size: 12, design: .rounded).weight(.light))
-                        .foregroundColor(.gray)
-                }
-            }
-        }
-
-        func buildNormalRow(item: SubscriptionPackage) -> some View {
-            HStack {
-                Text(item.storeProduct.displayName)
-                    .themed(style: theme.textThemeT1.title
-                        .copyWith(color: .black)
-                    )
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(item.storeProduct.displayPrice)
-                        .font(Font.system(size: 15, design: .rounded).weight(.bold))
-                        .foregroundColor(.black)
-                    if let desc = item.remoteProduct.priceDesc {
-                        Text(desc)
-                            .font(Font.system(size: 12, design: .rounded).weight(.light))
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-        }
-
-        func buildFreeTrialRow(item: SubscriptionPackage) -> some View {
-            HStack {
-                Text("\(item.remoteProduct.trialDays ?? 3) days free")
-                    .themed(style: theme.textThemeT1.title
-                        .copyWith(color: .black)
-                    )
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    HStack {
-                        Text("then")
-                            .font(Font.system(size: 12, design: .rounded).weight(.light))
-                            .foregroundColor(.gray)
-                        Text(item.storeProduct.displayPrice)
-                            .font(Font.system(size: 15, design: .rounded).weight(.bold))
-                            .foregroundColor(.black)
-                    }
-                    if let desc = item.remoteProduct.priceDesc {
-                        Text(desc)
-                            .font(Font.system(size: 12, design: .rounded).weight(.light))
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-        }
-
-        return HStack {
+        HStack {
             HStack {
                 VStack {
-                    if item.remoteProduct.isYearly {
-                        buildYearlyRow(item: item)
-                    } else {
-                        if item.remoteProduct.hasTrial && isTrialEnable {
-                            buildFreeTrialRow(item: item)
-                        } else {
-                            buildNormalRow(item: item)
+                    HStack {
+                        VStack(spacing: 4) {
+                            Text(item.storeProduct.displayName)
+                                .themed(style: theme.textThemeT1.title
+                                    .copyWith(color: .black)
+                                )
+                                .leadingFullWidth()
+                            Text(item.storeProduct.displayPrice)
+                                .themed(style: theme.textThemeT1.body
+                                    .copyWith(color: .black)
+                                )
+                                .leadingFullWidth()
                         }
+                        Image(
+                            systemName: item == selectedPackage ? "checkmark.circle.fill" : "circle"
+                        )
+                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundColor(theme.btnColor)
+                        .frame(width: 20, height: 20)
                     }
+                    Divider()
+                        .foregroundColor(.black.opacity(1))
+                    Text(item.storeProduct.description)
+                        .themed(style: theme.textThemeT1.body
+                            .copyWith(color: .gray)
+                        )
+                        .leadingFullWidth()
                 }
                 .widthExpanded()
-                .padding(.horizontal, 15)
-                .padding(.vertical, 18)
+                .padding(.all, 15)
             }
             .background(.white)
             .cornerRadiusWithBorder(
                 radius: 12,
-                borderLineWidth: item == selectedProduct ? 2.5 : 0,
+                borderLineWidth: item == selectedPackage  ? 2 : 0,
                 borderColor: theme.btnColor,
             )
             .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 0)
             .onTapGesture {
-                selectedProduct = item
+                selectedPackage = item
             }
         }
         .padding(.horizontal, 4)
