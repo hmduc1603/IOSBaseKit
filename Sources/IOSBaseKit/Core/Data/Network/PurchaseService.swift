@@ -200,8 +200,8 @@ public extension PurchaseService {
     /// You need to configure StoreKit Configuration
     var debugProductIds: [String] {
         [
-            ///   "com.debug.storekit.lifetime",
-            ///  "com.debug.storekit.weekly",
+            "com.debug.storekit.lifetime",
+            "com.debug.storekit.weekly",
             "com.debug.storekit.monthly",
             "com.debug.storekit.yearly"
         ]

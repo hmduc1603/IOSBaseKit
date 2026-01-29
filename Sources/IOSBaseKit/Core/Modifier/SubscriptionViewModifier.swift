@@ -228,6 +228,35 @@ public struct SubscriptionPickerView: View {
                             .copyWith(color: .gray)
                         )
                         .leadingFullWidth()
+                    if item.storeProduct.type == .nonConsumable {
+                        HStack {
+                            Text("Best Deal")
+                                .themed(style: theme.textThemeT1.light
+                                    .copyWith(color: theme.btnColor)
+                                )
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(theme.btnColor.opacity(0.1))
+                                .cornerRadius(8)
+                            Spacer()
+                            TimelineView(.periodic(from: .now, by: 1)) { _ in
+                                let timeLeft = timeLeftInDay()
+                                Text(
+                                    String(
+                                        format: "%02d:%02d:%02d Left",
+                                        timeLeft.hours,
+                                        timeLeft.minutes,
+                                        timeLeft.seconds
+                                    )
+                                )
+                                .themed(style: theme.textThemeT1.light.copyWith(color: .black))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(.gray.opacity(0.1))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
                 }
                 .widthExpanded()
                 .padding(.all, 15)
@@ -235,7 +264,7 @@ public struct SubscriptionPickerView: View {
             .background(.white)
             .cornerRadiusWithBorder(
                 radius: 12,
-                borderLineWidth: item == selectedPackage  ? 2 : 0,
+                borderLineWidth: item == selectedPackage ? 2 : 0,
                 borderColor: theme.btnColor,
             )
             .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 0)
@@ -244,5 +273,26 @@ public struct SubscriptionPickerView: View {
             }
         }
         .padding(.horizontal, 4)
+    }
+
+    private func timeLeftInDay() -> (hours: Int, minutes: Int, seconds: Int) {
+        let now = Date()
+        let calendar = Calendar.current
+
+        let startOfTomorrow = calendar.startOfDay(
+            for: calendar.date(byAdding: .day, value: 1, to: now)!
+        )
+
+        let components = calendar.dateComponents(
+            [.hour, .minute, .second],
+            from: now,
+            to: startOfTomorrow
+        )
+
+        return (
+            components.hour ?? 0,
+            components.minute ?? 0,
+            components.second ?? 0
+        )
     }
 }
