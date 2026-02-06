@@ -11,6 +11,10 @@ public struct AppLoadingHUD: View {
     @Environment(\.theme) private var theme
     public var message: String?
 
+    public init(message: String? = nil) {
+        self.message = message
+    }
+
     public var body: some View {
         ZStack {
             VStack {

@@ -17,11 +17,11 @@ public struct RemoteStoreProduct: Decodable {
         public var priceDesc: String? = nil
         public var trialDays: Int? = nil
 
-        var isYearly: Bool {
+        public var isYearly: Bool {
             productId.contains("yearly")
         }
-        
-        var hasTrial: Bool {
+
+        public var hasTrial: Bool {
             trialProductId != nil
         }
     }

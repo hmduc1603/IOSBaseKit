@@ -37,7 +37,7 @@ public final class AppColor: @unchecked Sendable {
     }
 }
 
-extension AppColor {
+public extension AppColor {
     var primaryColor: Color {
         getColorValue(key: "primaryColor")
     }
