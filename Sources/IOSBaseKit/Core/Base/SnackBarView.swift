@@ -1,49 +1,50 @@
+#if os(iOS)
 //
 //  SnackBarView.swift
-//  lgremote
+//  magiclight
 //
-//  Created by Dennis Hoang on 30/09/2024.
+//  Created by Dennis Hoang on 16/8/25.
 //
 
 import SwiftUI
 
-public struct SnackbarModifier: ViewModifier {
+public struct SnackBarView: View {
     @Environment(\.theme) private var theme
-    @Binding public var isShowing: Bool
-    public var message: () -> String
+    @State private var showSnackBar: Bool = false
+    @State private var snackBarMessage: String = ""
 
-    public func body(content: Content) -> some View {
-        ZStack {
-            content
-            VStack {
-                Spacer() // Push the Snackbar to the bottom
-                if isShowing {
-                    VStack {
-                        Text(message())
-                            .themed(style: theme.textThemeT1.button)
+    public var body: some View {
+        VStack {
+            Spacer()
+            if showSnackBar {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 0) {
+                        Text(snackBarMessage)
+                            .themed(style: theme.textThemeT1.light)
                             .multilineTextAlignment(.center)
                             .widthExpanded()
                             .bottomSafeArea()
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 8)
                     .background(theme.btnColor)
-                    .foregroundColor(theme.textColor)
-                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-                    .onAppear {
-                        // Hide Snackbar after 3 seconds
-                        Task { @MainActor in
-                            try await Task.sleep(for: 3)
-                            withAnimation {
-                                isShowing = false
-                            }
-                        }
-                    }
+                    .cornerRadius(8)
+                    Spacer()
                 }
             }
-            .animation(.easeInOut, value: isShowing)
-            .ignoresSafeArea()
         }
+        .onReceive(EvenBusManager.shared.subscribe(for: AppSnackBarEvent.self), perform: { event in
+            snackBarMessage = event.message
+            withAnimation {
+                showSnackBar = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                withAnimation {
+                    showSnackBar = false
+                }
+            }
+        })
     }
 }
 
@@ -55,3 +56,10 @@ public extension View {
         modifier(SnackbarModifier(isShowing: isShowing, message: message))
     }
 }
+
+public extension View {
+    func observeSnackBar() -> some View {
+        overlay(SnackBarView())
+    }
+}
+#endif

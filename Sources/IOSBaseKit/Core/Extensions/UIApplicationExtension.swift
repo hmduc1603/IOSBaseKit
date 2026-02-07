@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  ApplicationExtension.swift
 //  renoteai
@@ -17,3 +18,4 @@ public extension UIApplication {
             .first(where: \.isKeyWindow)
     }
 }
+#endif

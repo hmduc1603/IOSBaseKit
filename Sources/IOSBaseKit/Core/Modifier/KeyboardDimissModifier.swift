@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  KeyboardDimissModifier.swift
 //  magiclight
@@ -23,3 +24,4 @@ public extension View {
         modifier(KeyboardDimissModifier())
     }
 }
+#endif

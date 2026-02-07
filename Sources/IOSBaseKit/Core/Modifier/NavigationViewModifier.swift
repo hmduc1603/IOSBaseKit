@@ -62,6 +62,7 @@ public struct NavigationBarViewModifier: ViewModifier {
     public var onTrailingTap: (() -> Void)? = nil
 
     private func enableSwipeBack() {
+        #if os(iOS)
         /// Grab the underlying UINavigationController
         if let root = UIApplication.shared.connectedScenes
             .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
@@ -72,7 +73,10 @@ public struct NavigationBarViewModifier: ViewModifier {
                 nav.interactivePopGestureRecognizer?.delegate = nil
             }
         }
+        #endif
     }
+
+    #if os(iOS)
 
     private func findNavController(from vc: UIViewController) -> UINavigationController? {
         if let nav = vc as? UINavigationController {
@@ -85,6 +89,7 @@ public struct NavigationBarViewModifier: ViewModifier {
         }
         return nil
     }
+    #endif
 
     public func body(content: Content) -> some View {
         content
@@ -94,6 +99,7 @@ public struct NavigationBarViewModifier: ViewModifier {
             .navigationBarBackButtonHidden()
             .toolbarRole(.editor)
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
                         navigator.path.removeLast()
@@ -105,11 +111,25 @@ public struct NavigationBarViewModifier: ViewModifier {
                             .foregroundColor(theme.btnColor)
                     }
                 }
+                #else
+                ToolbarItem(placement: .navigation) {
+                    Button(action: {
+                        navigator.path.removeLast()
+                    }) {
+                        Image("ic_back")
+                            .resizable()
+                            .renderingMode(.template)
+                            .frame(width: 26, height: 26)
+                            .foregroundColor(theme.btnColor)
+                    }
+                }
+                #endif
                 ToolbarItem(placement: .principal) {
                     Text(title)
                         .font(.headline)
                         .themed(style: theme.textThemeT1.body.copyWith(weight: .bold))
                 }
+                #if os(iOS)
                 ToolbarItem(placement: .topBarTrailing) {
                     if let title = trailingTitle {
                         Button {
@@ -120,6 +140,18 @@ public struct NavigationBarViewModifier: ViewModifier {
                         }
                     }
                 }
+                #else
+                ToolbarItem(placement: .automatic) {
+                    if let title = trailingTitle {
+                        Button {
+                            onTrailingTap?()
+                        } label: {
+                            Text(title)
+                                .themed(style: theme.textThemeT1.title.copyWith(color: theme.btnColor))
+                        }
+                    }
+                }
+                #endif
             }
     }
 }
@@ -149,6 +181,7 @@ public struct CustomNavigationBarViewModifier<Trailing: View>: ViewModifier {
     public var trailing: () -> Trailing
 
     private func enableSwipeBack() {
+        #if os(iOS)
         /// Grab the underlying UINavigationController
         if let root = UIApplication.shared.connectedScenes
             .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
@@ -159,7 +192,10 @@ public struct CustomNavigationBarViewModifier<Trailing: View>: ViewModifier {
                 nav.interactivePopGestureRecognizer?.delegate = nil
             }
         }
+        #endif
     }
+
+    #if os(iOS)
 
     private func findNavController(from vc: UIViewController) -> UINavigationController? {
         if let nav = vc as? UINavigationController {
@@ -172,6 +208,7 @@ public struct CustomNavigationBarViewModifier<Trailing: View>: ViewModifier {
         }
         return nil
     }
+    #endif
 
     public func body(content: Content) -> some View {
         content
@@ -181,6 +218,7 @@ public struct CustomNavigationBarViewModifier<Trailing: View>: ViewModifier {
             .navigationBarBackButtonHidden()
             .toolbarRole(.editor)
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
                         navigator.path.removeLast()
@@ -192,14 +230,33 @@ public struct CustomNavigationBarViewModifier<Trailing: View>: ViewModifier {
                             .foregroundColor(theme.btnColor)
                     }
                 }
+                #else
+                ToolbarItem(placement: .navigation) {
+                    Button(action: {
+                        navigator.path.removeLast()
+                    }) {
+                        Image("ic_back")
+                            .resizable()
+                            .renderingMode(.template)
+                            .frame(width: 26, height: 26)
+                            .foregroundColor(theme.btnColor)
+                    }
+                }
+                #endif
                 ToolbarItem(placement: .principal) {
                     Text(title)
                         .font(.headline)
                         .themed(style: theme.textThemeT1.body.copyWith(weight: .bold))
                 }
+                #if os(iOS)
                 ToolbarItem(placement: .topBarTrailing) {
                     trailing()
                 }
+                #else
+                ToolbarItem(placement: .automatic) {
+                    trailing()
+                }
+                #endif
             }
     }
 }

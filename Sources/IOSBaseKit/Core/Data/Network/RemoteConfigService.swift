@@ -12,7 +12,9 @@ import Foundation
 
 public protocol RemoteConfigService {
     func initConfig() async throws
+    #if os(iOS)
     var adConfig: AdConfig { get }
+    #endif
     var iosProducts: RemoteStoreProduct { get }
     var setPremiumUsers: [String] { get }
     var reviewConfig: Int { get }
@@ -77,6 +79,7 @@ public class RemoteConfigServiceImpl: RemoteConfigService, @unchecked Sendable {
         return iosProducts ?? .init(features: [], normal: [], intro: [])
     }
 
+    #if os(iOS)
     public var adConfig: AdConfig {
         let raw = remoteConfig[kAdConfig].stringValue
         let data = Data(raw.utf8)
@@ -84,6 +87,7 @@ public class RemoteConfigServiceImpl: RemoteConfigService, @unchecked Sendable {
         guard let config = AdConfig.fromJsonData(json: jsonObject as! [String: Any]) else { fatalError("Invalid adConfig data") }
         return config
     }
+    #endif
 
     public var setPremiumUsers: [String] {
         let raw = remoteConfig[kSetPremiumUsers].stringValue

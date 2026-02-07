@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AdmobService.swift
 //  renoteai
@@ -381,3 +382,4 @@ public extension AdmobService {
         }
     }
 }
+#endif

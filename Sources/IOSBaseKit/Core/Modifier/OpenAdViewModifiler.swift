@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  OpenAdViewModifiler.swift
 //  Delta
@@ -34,3 +35,4 @@ public struct OpenAdViewModifiler: ViewModifier {
             }
     }
 }
+#endif

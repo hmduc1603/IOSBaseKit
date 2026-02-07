@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AppTextField.swift
 //  lgremote
@@ -103,3 +104,4 @@ public struct AppTextEditor: View {
         }
     }
 }
+#endif

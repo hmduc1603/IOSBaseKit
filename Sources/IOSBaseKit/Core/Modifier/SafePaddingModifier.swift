@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  SafePaddingModifier.swift
 //  lgremote
@@ -41,3 +42,4 @@ public extension View {
         modifier(SafePaddingModifier(edge: .top))
     }
 }
+#endif

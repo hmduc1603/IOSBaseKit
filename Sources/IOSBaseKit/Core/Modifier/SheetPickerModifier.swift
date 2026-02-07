@@ -11,6 +11,7 @@ public protocol ItemLabelProtocol {
     var label: String { get }
 }
 
+#if os(iOS)
 public struct SheetPickerModifier<M: Hashable & ItemLabelProtocol>: ViewModifier {
     @Environment(\.theme) private var theme
 
@@ -61,3 +62,4 @@ public extension View {
         ))
     }
 }
+#endif

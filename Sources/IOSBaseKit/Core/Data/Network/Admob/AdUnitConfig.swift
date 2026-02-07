@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AdUnitConfig.swift
 //  renoteai
@@ -95,3 +96,4 @@ public extension AdUnitConfig {
                      interstitialId: EnvConfig.interstitialAdUnitId.debugEnvValue as? String ?? "")
     }
 }
+#endif

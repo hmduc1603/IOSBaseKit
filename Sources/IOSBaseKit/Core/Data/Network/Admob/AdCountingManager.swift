@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AdCountingManager.swift
 //  renoteai
@@ -63,3 +64,4 @@ public class AdsCountingManager: @unchecked Sendable {
         }
     }
 }
+#endif

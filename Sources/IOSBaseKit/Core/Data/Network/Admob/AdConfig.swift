@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AdConfig.swift
 //  renoteai
@@ -60,3 +61,4 @@ public struct AdConfig: Codable {
         Self(json: json)
     }
 }
+#endif

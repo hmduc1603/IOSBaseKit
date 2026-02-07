@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  KeyboardViewExtension.swift
 //  renoteai
@@ -51,3 +52,4 @@ public extension View {
         modifier(DismissKeyboardOnTap())
     }
 }
+#endif

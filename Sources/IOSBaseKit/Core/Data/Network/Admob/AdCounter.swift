@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AdCounter.swift
 //  renoteai
@@ -46,3 +47,4 @@ public struct AdCounter: Codable {
         self.adsCounting += 1
     }
 }
+#endif

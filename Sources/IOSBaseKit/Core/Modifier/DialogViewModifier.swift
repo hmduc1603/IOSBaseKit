@@ -16,7 +16,9 @@ public struct DialogViewModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .onAppear {
+                #if os(iOS)
                 UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor(hexString: AppColor.shared.getColorHex(key: "buttonColor"))
+                #endif
             }
             .onReceive(EvenBusManager.shared.subscribe(for: AppMessageEvent.self), perform: { event in
                 alertTitle = event.message

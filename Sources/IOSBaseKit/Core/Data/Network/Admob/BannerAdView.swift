@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  BannerAds.swift
 //  renoteai
@@ -39,3 +40,4 @@ private struct BannerAdViewWrapper: UIViewRepresentable {
         uiView.load(Request())
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  ScrollViewExtension.swift
 //  lgremote
@@ -44,3 +45,4 @@ public extension View {
         modifier(ScrollOnKeyboardViewModifier(scrollToID: scrollToID))
     }
 }
+#endif

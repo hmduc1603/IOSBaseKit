@@ -182,6 +182,7 @@ public final class PurchaseService: @unchecked Sendable {
         }
     }
 
+    #if os(iOS)
     @MainActor
     public func requestReview() {
         if let scene = UIApplication.shared.connectedScenes
@@ -190,6 +191,7 @@ public final class PurchaseService: @unchecked Sendable {
             AppStore.requestReview(in: scene)
         }
     }
+    #endif
 
     deinit {
         transactionObservingTask?.cancel()
