@@ -16,6 +16,7 @@ public struct RemoteStoreProduct: Decodable {
         public var isActive: Bool = false
         public var priceDesc: String? = nil
         public var trialDays: Int? = nil
+        public var isLimitedDeal: Bool = false
 
         public var isYearly: Bool {
             productId.contains("yearly")
