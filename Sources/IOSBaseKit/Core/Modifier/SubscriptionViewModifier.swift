@@ -6,6 +6,7 @@
 //
 
 import Factory
+import FirebaseAnalytics
 import StoreKit
 import SwiftUI
 
@@ -28,7 +29,7 @@ public struct SubscriptionViewModifier: ViewModifier {
             .sheet(
                 isPresented: $shouldShowSubScreen,
             ) {
-                SubscriptionFrameView { showLoading in
+                SubscriptionFrameView(isIntro: false) { showLoading in
                     SubscriptionPickerView(
                         isIntroSub: false,
                         packages: PurchaseService.shared.packages,
@@ -39,7 +40,7 @@ public struct SubscriptionViewModifier: ViewModifier {
             .sheet(
                 isPresented: $shouldIntroShowSubScreen,
             ) {
-                SubscriptionFrameView { showLoading in
+                SubscriptionFrameView(isIntro: true) { showLoading in
                     SubscriptionPickerView(
                         isIntroSub: true,
                         packages: PurchaseService.shared.introPackages,
@@ -69,6 +70,7 @@ private struct SubscriptionFrameView<Content: View>: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showLoading: Bool = false
+    var isIntro: Bool
     @ViewBuilder var content: (_ showLoading: Binding<Bool>) -> Content
 
     var body: some View {
@@ -88,6 +90,7 @@ private struct SubscriptionFrameView<Content: View>: View {
                     HStack {
                         Spacer()
                         Button {
+                            Analytics.logEvent("subscription_view_close", parameters: ["is_intro": isIntro])
                             dismiss()
                         } label: {
                             Image(systemName: "xmark.circle.fill")
@@ -192,6 +195,7 @@ public struct SubscriptionPickerView: View {
             }
         }
         .onAppear {
+            Analytics.logEvent("subscription_view_open", parameters: ["is_intro": isIntroSub])
             selectedPackage = PurchaseService.shared.packages.last
         }
     }
@@ -269,6 +273,10 @@ public struct SubscriptionPickerView: View {
             )
             .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 0)
             .onTapGesture {
+                Analytics.logEvent("subscription_package_selected", parameters: [
+                    "package_id": item.storeProduct.id,
+                    "is_intro": isIntroSub
+                ])
                 selectedPackage = item
             }
         }
