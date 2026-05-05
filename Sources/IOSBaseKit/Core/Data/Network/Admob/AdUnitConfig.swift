@@ -14,6 +14,7 @@ public struct AdUnitConfig: Codable {
     public let appOpenId: String
     public let rewardId: String
     public let interstitialId: String
+    public let appOpenHighFloorId: String?
 
     public enum CodingKeys: String, CodingKey {
         case adId
@@ -21,6 +22,7 @@ public struct AdUnitConfig: Codable {
         case appOpenId
         case rewardId
         case interstitialId
+        case appOpenHighFloorId
     }
 
     public init(
@@ -28,13 +30,15 @@ public struct AdUnitConfig: Codable {
         bannerId: String,
         appOpenId: String,
         rewardId: String,
-        interstitialId: String
+        interstitialId: String,
+        appOpenHighFloorId: String? = nil
     ) {
         self.adId = adId
         self.bannerId = bannerId
         self.appOpenId = appOpenId
         self.rewardId = rewardId
         self.interstitialId = interstitialId
+        self.appOpenHighFloorId = appOpenHighFloorId
     }
 
     // Initialize from a JSON dictionary
@@ -52,6 +56,7 @@ public struct AdUnitConfig: Codable {
         self.appOpenId = appOpenId
         self.rewardId = rewardId
         self.interstitialId = interstitialId
+        self.appOpenHighFloorId = json["appOpenHighFloorId"] as? String
     }
 
     // Convert to a JSON dictionary
@@ -62,6 +67,7 @@ public struct AdUnitConfig: Codable {
             "appOpenId": appOpenId,
             "rewardId": rewardId,
             "interstitialId": interstitialId,
+            "appOpenHighFloorId": appOpenHighFloorId as Any,
         ]
     }
 
@@ -84,16 +90,18 @@ public extension AdUnitConfig {
         AdUnitConfig(adId: EnvConfig.appUnitId.envValue as? String ?? "",
                      bannerId: EnvConfig.bannerAdUnitId.envValue as? String ?? "",
                      appOpenId: EnvConfig.openAdUnitId.envValue as? String ?? "",
-                     rewardId: EnvConfig.rewardAdUnitId.envValue as? String ?? "",
-                     interstitialId: EnvConfig.interstitialAdUnitId.envValue as? String ?? "")
+                      rewardId: EnvConfig.rewardAdUnitId.envValue as? String ?? "",
+                      interstitialId: EnvConfig.interstitialAdUnitId.envValue as? String ?? "",
+                      appOpenHighFloorId: EnvConfig.openAdHighFloorUnitId.safeEnvValue as? String)
     }
 
     static func getDebugAdUnitConfig() -> AdUnitConfig {
         AdUnitConfig(adId: EnvConfig.appUnitId.debugEnvValue as? String ?? "",
                      bannerId: EnvConfig.bannerAdUnitId.debugEnvValue as? String ?? "",
                      appOpenId: EnvConfig.openAdUnitId.debugEnvValue as? String ?? "",
-                     rewardId: EnvConfig.rewardAdUnitId.debugEnvValue as? String ?? "",
-                     interstitialId: EnvConfig.interstitialAdUnitId.debugEnvValue as? String ?? "")
+                      rewardId: EnvConfig.rewardAdUnitId.debugEnvValue as? String ?? "",
+                      interstitialId: EnvConfig.interstitialAdUnitId.debugEnvValue as? String ?? "",
+                      appOpenHighFloorId: EnvConfig.openAdHighFloorUnitId.safeDebugEnvValue as? String)
     }
 }
 #endif

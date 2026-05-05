@@ -21,12 +21,14 @@ public class AdmobService: @unchecked Sendable {
 
     private var bannerId: String?
     private var appOpenId: String?
+    private var appOpenHighFloorId: String?
     private var rewardId: String?
     private var interstitialId: String?
 
     private var interstitialAd: InterstitialAd?
     private var adDelegate: AdDelegate?
     private var openAd: AppOpenAd?
+    private var openHighFloorAd: AppOpenAd?
     private var rewardedAd: RewardedAd?
 
     public func setup(_ config: AdConfig) async throws {
@@ -49,6 +51,7 @@ public class AdmobService: @unchecked Sendable {
             interstitialId = AdUnitConfig.getDebugAdUnitConfig().interstitialId
             bannerId = AdUnitConfig.getDebugAdUnitConfig().bannerId
             rewardId = AdUnitConfig.getDebugAdUnitConfig().rewardId
+            appOpenHighFloorId = AdUnitConfig.getDebugAdUnitConfig().appOpenHighFloorId   
         }
 
         /// Show consent form first
@@ -178,16 +181,37 @@ public class AdmobService: @unchecked Sendable {
             return
         }
         let adUnitId = appOpenId ?? AdUnitConfig.getAdUnitConfig().appOpenId
-        await withUnsafeContinuation { continuation in
-            AppOpenAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
-                if let error {
-                    print("Failed to load Open ad: \(error)")
-                    continuation.resume()
-                    return
+        let highFloorAdUnitId = appOpenHighFloorId ?? AdUnitConfig.getAdUnitConfig().appOpenHighFloorId
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                await withUnsafeContinuation { continuation in
+                    AppOpenAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
+                        if let error {
+                            print("Failed to load Open ad: \(error)")
+                        } else {
+                            print("AdmobService: Preloaded Open Ad!")
+                            self?.openAd = ad
+                        }
+                        continuation.resume()
+                    }
                 }
-                print("AdmobService: Preloaded Open Ad!")
-                self?.openAd = ad
-                continuation.resume()
+            }
+
+            if let highFloorId = highFloorAdUnitId, !highFloorId.isEmpty {
+                group.addTask {
+                    await withUnsafeContinuation { continuation in
+                        AppOpenAd.load(with: highFloorId, request: Request()) { [weak self] ad, error in
+                            if let error {
+                                print("Failed to load High Floor Open ad: \(error)")
+                            } else {
+                                print("AdmobService: Preloaded High Floor Open Ad!")
+                                self?.openHighFloorAd = ad
+                            }
+                            continuation.resume()
+                        }
+                    }
+                }
             }
         }
     }
@@ -236,17 +260,21 @@ public class AdmobService: @unchecked Sendable {
         }
         print("AdmobService: showOpenAd")
         await withCheckedContinuation { continuation in
-            if let open = openAd {
+            if let open = openHighFloorAd ?? openAd {
                 adDelegate = AdDelegate(
                     onAdDismissed: {
                         print("Ad was dismissed, calling completion.")
                         Analytics.logEvent("did_show_open_ad", parameters: nil)
+                        self.openAd = nil
+                        self.openHighFloorAd = nil
                         self.preloadOpenSync()
                         continuation.resume()
                     },
                     onAdFailedToPresent: { error in
                         Analytics.logEvent("failed_to_show_open_ad", parameters: nil)
                         print("Ad failed to present: \(error.localizedDescription)")
+                        self.openAd = nil
+                        self.openHighFloorAd = nil
                         self.preloadOpenSync()
                         continuation.resume()
                     }
@@ -268,17 +296,21 @@ public class AdmobService: @unchecked Sendable {
             return
         }
         print("AdmobService: showOpenAd")
-        if let open = openAd {
+        if let open = openHighFloorAd ?? openAd {
             adDelegate = AdDelegate(
                 onAdDismissed: {
                     print("Ad was dismissed, calling completion.")
                     Analytics.logEvent("did_show_open_ad", parameters: nil)
+                    self.openAd = nil
+                    self.openHighFloorAd = nil
                     self.preloadOpenSync()
                     completion?()
                 },
                 onAdFailedToPresent: { error in
                     print("Ad failed to present: \(error.localizedDescription)")
                     Analytics.logEvent("failed_to_show_open_ad", parameters: nil)
+                    self.openAd = nil
+                    self.openHighFloorAd = nil
                     self.preloadOpenSync()
                     completion?()
                 }

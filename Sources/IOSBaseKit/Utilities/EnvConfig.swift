@@ -18,6 +18,7 @@ public enum EnvConfig: String {
     case openAdUnitId
     case rewardAdUnitId
     case interstitialAdUnitId
+    case openAdHighFloorUnitId
 
     public static var isDebug: Bool {
         #if DEBUG
@@ -75,5 +76,13 @@ public enum EnvConfig: String {
             fatalError("Couldn't find value for \(self.rawValue) in plist")
         }
         return value
+    }
+
+    public var safeEnvValue: Any? {
+        return envDictionary.object(forKey: self.rawValue)
+    }
+
+    public var safeDebugEnvValue: Any? {
+        return debugEnvDictionary.object(forKey: self.rawValue)
     }
 }
