@@ -22,10 +22,12 @@ public class AdmobService: @unchecked Sendable {
     private var bannerId: String?
     private var appOpenId: String?
     private var appOpenHighFloorId: String?
+    private var interstitialHighFloorId: String?
     private var rewardId: String?
     private var interstitialId: String?
 
     private var interstitialAd: InterstitialAd?
+    private var interstitialHighFloorAd: InterstitialAd?
     private var adDelegate: AdDelegate?
     private var openAd: AppOpenAd?
     private var openHighFloorAd: AppOpenAd?
@@ -52,6 +54,7 @@ public class AdmobService: @unchecked Sendable {
             bannerId = AdUnitConfig.getDebugAdUnitConfig().bannerId
             rewardId = AdUnitConfig.getDebugAdUnitConfig().rewardId
             appOpenHighFloorId = AdUnitConfig.getDebugAdUnitConfig().appOpenHighFloorId   
+            interstitialHighFloorId = AdUnitConfig.getDebugAdUnitConfig().interstitialHighFloorId
         }
 
         /// Show consent form first
@@ -78,16 +81,37 @@ public class AdmobService: @unchecked Sendable {
             return
         }
         let adUnitId = interstitialId ?? AdUnitConfig.getAdUnitConfig().interstitialId
-        await withUnsafeContinuation { continuation in
-            InterstitialAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
-                if let error {
-                    print("Failed to load interstitial ad: \(error)")
-                    continuation.resume()
-                    return
+        let highFloorAdUnitId = interstitialHighFloorId ?? AdUnitConfig.getAdUnitConfig().interstitialHighFloorId
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                await withUnsafeContinuation { continuation in
+                    InterstitialAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
+                        if let error {
+                            print("Failed to load interstitial ad: \(error)")
+                        } else {
+                            print("AdmobService: Preloaded Interstitial Ad!")
+                            self?.interstitialAd = ad
+                        }
+                        continuation.resume()
+                    }
                 }
-                print("AdmobService: Preloaded Interstitial Ad!")
-                self?.interstitialAd = ad
-                continuation.resume()
+            }
+
+            if let highFloorId = highFloorAdUnitId, !highFloorId.isEmpty {
+                group.addTask {
+                    await withUnsafeContinuation { continuation in
+                        InterstitialAd.load(with: highFloorId, request: Request()) { [weak self] ad, error in
+                            if let error {
+                                print("Failed to load High Floor interstitial ad: \(error)")
+                            } else {
+                                print("AdmobService: Preloaded High Floor Interstitial Ad!")
+                                self?.interstitialHighFloorAd = ad
+                            }
+                            continuation.resume()
+                        }
+                    }
+                }
             }
         }
     }
@@ -222,22 +246,30 @@ public class AdmobService: @unchecked Sendable {
             return
         }
         print("AdmobService: showInterstitial")
-        AdsCountingManager.shared.checkShouldShowAds { shouldShow in
+        AdsCountingManager.shared.checkShouldShowAds { [weak self] shouldShow in
+            guard let self = self else {
+                completion()
+                return
+            }
             if shouldShow {
-                if let interstitial = self.interstitialAd {
+                if let interstitial = self.interstitialHighFloorAd ?? self.interstitialAd {
                     // Set up the custom delegate
                     self.adDelegate = AdDelegate(
-                        onAdDismissed: {
+                        onAdDismissed: { [weak self] in
                             print("Ad was dismissed, calling completion.")
                             Analytics.logEvent("did_show_interstitial_ad", parameters: nil)
+                            self?.interstitialAd = nil
+                            self?.interstitialHighFloorAd = nil
                             completion()
-                            self.preloadInterstitialSync()
+                            self?.preloadInterstitialSync()
                         },
-                        onAdFailedToPresent: { error in
+                        onAdFailedToPresent: { [weak self] error in
                             print("Ad failed to present: \(error.localizedDescription)")
                             Analytics.logEvent("failed_show_interstitial_ad", parameters: nil)
+                            self?.interstitialAd = nil
+                            self?.interstitialHighFloorAd = nil
                             completion()
-                            self.preloadInterstitialSync()
+                            self?.preloadInterstitialSync()
                         }
                     )
                     interstitial.fullScreenContentDelegate = self.adDelegate
@@ -246,6 +278,10 @@ public class AdmobService: @unchecked Sendable {
                     }
                 } else {
                     print("Interstitial ad is not ready.")
+                    self.interstitialAd = nil
+                    self.interstitialHighFloorAd = nil
+                    completion()
+                    self.preloadInterstitialSync()
                 }
             } else {
                 completion()
