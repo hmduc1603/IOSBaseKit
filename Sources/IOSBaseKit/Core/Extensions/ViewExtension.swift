@@ -20,17 +20,6 @@ public extension View {
     }
     #endif
 
-    func expanded() -> some View {
-        modifier(ExpandViewModifier(maxWidth: .infinity, maxHeight: .infinity))
-    }
-
-    func widthExpanded() -> some View {
-        modifier(ExpandViewModifier(maxWidth: .infinity))
-    }
-
-    func heightExpanded() -> some View {
-        modifier(ExpandViewModifier(maxHeight: .infinity))
-    }
 
     #if os(iOS)
     func getBottomSafeArea() -> CGFloat {

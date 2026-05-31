@@ -15,7 +15,7 @@ public struct BannerAdView: View {
     public var body: some View {
         VStack {
             BannerAdViewWrapper()
-                .widthExpanded()
+                .frame(maxWidth: .infinity)
                 .frame(height: AdSizeFullBanner.size.height)
         }
         .frame(height: AdSizeFullBanner.size.height)
