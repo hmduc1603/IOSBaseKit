@@ -140,4 +140,54 @@ public class APIService {
                 }
             }
     }
+
+    public static func upload<T: Decodable & Sendable>(
+        _ url: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String,
+        headers: HTTPHeaders? = nil
+    ) async throws -> T {
+        return try await withCheckedThrowingContinuation { continuation in
+            AF.upload(
+                multipartFormData: { multipartFormData in
+                    multipartFormData.append(fileData, withName: "file", fileName: fileName, mimeType: mimeType)
+                },
+                to: url,
+                headers: headers
+            )
+            .validate()
+            .response { response in
+                switch response.result {
+                case .success(let value):
+                    if let data = value {
+                        do {
+                            let decoded = try JSONDecoder().decode(T.self, from: data)
+                            continuation.resume(returning: decoded)
+                        } catch {
+                            print("APIService.upload: Failed to decode!")
+                            print("APIService.upload: Raw Data: \(String(data: value ?? Data(), encoding: .utf8) ?? "No data")")
+                            continuation.resume(throwing: error)
+                        }
+                    } else {
+                        continuation.resume(throwing: AFError.responseValidationFailed(reason: .dataFileNil))
+                    }
+                case .failure(let error):
+                    if let data = response.data,
+                       let serverMessage = String(data: data, encoding: .utf8)
+                    {
+                        print("APIService.upload: Server Error \(response.response?.statusCode ?? 0) - \(serverMessage)")
+                        let customError = NSError(
+                            domain: "APIService.UploadError",
+                            code: response.response?.statusCode ?? -1,
+                            userInfo: [NSLocalizedDescriptionKey: serverMessage]
+                        )
+                        continuation.resume(throwing: customError)
+                    } else {
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
+    }
 }
