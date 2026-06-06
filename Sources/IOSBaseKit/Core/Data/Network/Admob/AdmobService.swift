@@ -296,23 +296,24 @@ public class AdmobService: @unchecked Sendable {
         }
         print("AdmobService: showOpenAd")
         await withCheckedContinuation { continuation in
+            let safeContinuation = SafeCheckedContinuation(continuation)
             if let open = openHighFloorAd ?? openAd {
                 adDelegate = AdDelegate(
-                    onAdDismissed: {
+                    onAdDismissed: { [weak self] in
                         print("Ad was dismissed, calling completion.")
                         Analytics.logEvent("did_show_open_ad", parameters: nil)
-                        self.openAd = nil
-                        self.openHighFloorAd = nil
-                        self.preloadOpenSync()
-                        continuation.resume()
+                        self?.openAd = nil
+                        self?.openHighFloorAd = nil
+                        self?.preloadOpenSync()
+                        safeContinuation.resume(returning: ())
                     },
-                    onAdFailedToPresent: { error in
+                    onAdFailedToPresent: { [weak self] error in
                         Analytics.logEvent("failed_to_show_open_ad", parameters: nil)
                         print("Ad failed to present: \(error.localizedDescription)")
-                        self.openAd = nil
-                        self.openHighFloorAd = nil
-                        self.preloadOpenSync()
-                        continuation.resume()
+                        self?.openAd = nil
+                        self?.openHighFloorAd = nil
+                        self?.preloadOpenSync()
+                        safeContinuation.resume(returning: ())
                     }
                 )
                 open.fullScreenContentDelegate = adDelegate
@@ -321,7 +322,7 @@ public class AdmobService: @unchecked Sendable {
                 }
             } else {
                 print("Open ad is not ready.")
-                continuation.resume()
+                safeContinuation.resume(returning: ())
             }
         }
     }
@@ -375,13 +376,49 @@ class AdDelegate: NSObject, FullScreenContentDelegate {
     // Called when the ad is dismissed
     func adDidDismissFullScreenContent(_: FullScreenPresentingAd) {
         print("Ad was dismissed.")
-        onAdDismissed?() // Call the provided closure when the ad is dismissed
+        if let onDismissed = onAdDismissed {
+            self.onAdDismissed = nil
+            self.onAdFailedToPresent = nil
+            onDismissed()
+        }
     }
 
     // Called when the ad fails to present
     func ad(_: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         print("Ad failed to present: \(error.localizedDescription)")
-        onAdFailedToPresent?(error) // Call the provided closure when the ad fails
+        if let onFailed = onAdFailedToPresent {
+            self.onAdDismissed = nil
+            self.onAdFailedToPresent = nil
+            onFailed(error)
+        }
+    }
+}
+
+// A thread-safe wrapper to ensure CheckedContinuation is resumed exactly once.
+private final class SafeCheckedContinuation<T, E: Error>: @unchecked Sendable {
+    private var continuation: CheckedContinuation<T, E>?
+    private let lock = NSLock()
+
+    init(_ continuation: CheckedContinuation<T, E>) {
+        self.continuation = continuation
+    }
+
+    func resume(returning value: T) {
+        lock.lock()
+        defer { lock.unlock() }
+        if let continuation = self.continuation {
+            self.continuation = nil
+            continuation.resume(returning: value)
+        }
+    }
+
+    func resume(throwing error: E) {
+        lock.lock()
+        defer { lock.unlock() }
+        if let continuation = self.continuation {
+            self.continuation = nil
+            continuation.resume(throwing: error)
+        }
     }
 }
 
