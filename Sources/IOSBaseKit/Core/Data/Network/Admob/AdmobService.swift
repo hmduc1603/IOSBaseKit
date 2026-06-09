@@ -295,7 +295,7 @@ public class AdmobService: @unchecked Sendable {
             return
         }
         print("AdmobService: showOpenAd")
-        await withCheckedContinuation { continuation in
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             let safeContinuation = SafeCheckedContinuation(continuation)
             if let open = openHighFloorAd ?? openAd {
                 adDelegate = AdDelegate(
