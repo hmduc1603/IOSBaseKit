@@ -395,7 +395,7 @@ class AdDelegate: NSObject, FullScreenContentDelegate {
 }
 
 // A thread-safe wrapper to ensure CheckedContinuation is resumed exactly once.
-private final class SafeCheckedContinuation<T, E: Error>: @unchecked Sendable {
+private final class SafeCheckedContinuation<T: Sendable, E: Error>: @unchecked Sendable {
     private var continuation: CheckedContinuation<T, E>?
     private let lock = NSLock()
 
