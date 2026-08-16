@@ -20,6 +20,7 @@ public enum EnvConfig: String {
     case interstitialAdUnitId
     case openAdHighFloorUnitId
     case interstitialAdHighFloorUnitId
+    case rewardAdHighFloorUnitId
 
     public static var isDebug: Bool {
         #if DEBUG

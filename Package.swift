@@ -22,7 +22,7 @@ let package = Package(
         .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "2.5.3")),
         .package(url: "https://github.com/firebase/firebase-ios-sdk", .upToNextMajor(from: "12.1.0")),
         .package(url: "https://github.com/onevcat/Kingfisher.git", .upToNextMajor(from: "8.5.0")),
-        .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads", .upToNextMajor(from: "12.9.0")),
+        .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads", .upToNextMajor(from: "13.7.0")),
         .package(url: "https://github.com/googleads/swift-package-manager-google-user-messaging-platform", .upToNextMajor(from: "3.0.0")),
     ],
     targets: [

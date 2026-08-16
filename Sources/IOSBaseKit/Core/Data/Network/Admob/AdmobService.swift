@@ -24,6 +24,7 @@ public class AdmobService: @unchecked Sendable {
     private var appOpenHighFloorId: String?
     private var interstitialHighFloorId: String?
     private var rewardId: String?
+    private var rewardHighFloorId: String?
     private var interstitialId: String?
 
     private var interstitialAd: InterstitialAd?
@@ -32,6 +33,7 @@ public class AdmobService: @unchecked Sendable {
     private var openAd: AppOpenAd?
     private var openHighFloorAd: AppOpenAd?
     private var rewardedAd: RewardedAd?
+    private var rewardedHighFloorAd: RewardedAd?
 
     public func setup(_ config: AdConfig) async throws {
         print("AdmobService: setup")
@@ -55,6 +57,7 @@ public class AdmobService: @unchecked Sendable {
             rewardId = AdUnitConfig.getDebugAdUnitConfig().rewardId
             appOpenHighFloorId = AdUnitConfig.getDebugAdUnitConfig().appOpenHighFloorId   
             interstitialHighFloorId = AdUnitConfig.getDebugAdUnitConfig().interstitialHighFloorId
+            rewardHighFloorId = AdUnitConfig.getDebugAdUnitConfig().rewardHighFloorId
         }
 
         /// Show consent form first
@@ -123,16 +126,37 @@ public class AdmobService: @unchecked Sendable {
             return
         }
         let adUnitId = rewardId ?? AdUnitConfig.getAdUnitConfig().rewardId
-        await withUnsafeContinuation { continuation in
-            RewardedAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
-                if let error {
-                    print("Failed to load rewarded ad: \(error.localizedDescription)")
-                    continuation.resume()
-                    return
+        let highFloorAdUnitId = rewardHighFloorId ?? AdUnitConfig.getAdUnitConfig().rewardHighFloorId
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                await withUnsafeContinuation { continuation in
+                    RewardedAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
+                        if let error {
+                            print("Failed to load rewarded ad: \(error.localizedDescription)")
+                        } else {
+                            print("AdmobService: Preloaded Rewarded Ad!")
+                            self?.rewardedAd = ad
+                        }
+                        continuation.resume()
+                    }
                 }
-                print("AdmobService: Preloaded Rewarded Ad!")
-                self?.rewardedAd = ad
-                continuation.resume()
+            }
+
+            if let highFloorId = highFloorAdUnitId, !highFloorId.isEmpty {
+                group.addTask {
+                    await withUnsafeContinuation { continuation in
+                        RewardedAd.load(with: highFloorId, request: Request()) { [weak self] ad, error in
+                            if let error {
+                                print("Failed to load High Floor rewarded ad: \(error.localizedDescription)")
+                            } else {
+                                print("AdmobService: Preloaded High Floor Rewarded Ad!")
+                                self?.rewardedHighFloorAd = ad
+                            }
+                            continuation.resume()
+                        }
+                    }
+                }
             }
         }
     }
@@ -141,19 +165,7 @@ public class AdmobService: @unchecked Sendable {
         guard config?.enableRewardAd == true, !UserDefaults.standard.isPremium else {
             return
         }
-        let adUnitId = rewardId ?? AdUnitConfig.getAdUnitConfig().rewardId
-        await withUnsafeContinuation { continuation in
-            RewardedAd.load(with: adUnitId, request: Request()) { [weak self] ad, error in
-                if let error {
-                    print("Failed to load rewarded ad: \(error.localizedDescription)")
-                    continuation.resume()
-                    return
-                }
-                print("AdmobService: Preloaded Rewarded Ad!")
-                self?.rewardedAd = ad
-                continuation.resume()
-            }
-        }
+        await preloadRewardedAd()
         await showRewardedAd(completion: completion)
     }
 
@@ -166,14 +178,16 @@ public class AdmobService: @unchecked Sendable {
             return
         }
 
-        guard let ad = rewardedAd else {
+        guard let ad = rewardedHighFloorAd ?? rewardedAd else {
             print("Rewarded ad not ready")
             completion(false)
             return
         }
+        rewardedAd = nil
+        rewardedHighFloorAd = nil
 
         ad.fullScreenContentDelegate = AdDelegate(
-            onAdDismissed: { [weak self] in
+            onAdDismissed: {
                 print("Rewarded ad dismissed")
             },
             onAdFailedToPresent: { [weak self] error in
