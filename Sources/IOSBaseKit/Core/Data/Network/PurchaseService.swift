@@ -38,6 +38,9 @@ public final class PurchaseService: @unchecked Sendable {
     public static let shared = PurchaseService()
 
     public var recorder: PurchaseRecordPotocol?
+    /// Attached to every purchase so App Store Server Notifications can be tied back to this
+    /// install (e.g. `AdTrackingKit.shared.appAccountToken` for Apple Search Ads attribution).
+    public var appAccountToken: UUID?
 
     private var transactionObservingTask: Task<Void, Never>?
     public var packages: [SubscriptionPackage] = []
@@ -143,7 +146,11 @@ public final class PurchaseService: @unchecked Sendable {
 
     public func purchase(product: Product, isIntroSub: Bool) async -> Bool {
         do {
-            let result = try await product.purchase()
+            var options: Set<Product.PurchaseOption> = []
+            if let appAccountToken {
+                options.insert(.appAccountToken(appAccountToken))
+            }
+            let result = try await product.purchase(options: options)
             switch result {
             case .success(let verification):
                 switch verification {
