@@ -39,7 +39,7 @@ public final class PurchaseService: @unchecked Sendable {
 
     public var recorder: PurchaseRecordPotocol?
     /// Attached to every purchase so App Store Server Notifications can be tied back to this
-    /// install (e.g. `AdTrackingKit.shared.appAccountToken` for Apple Search Ads attribution).
+    /// install (`AdTrackingService.start` sets it for Apple Search Ads attribution).
     public var appAccountToken: UUID?
 
     private var transactionObservingTask: Task<Void, Never>?

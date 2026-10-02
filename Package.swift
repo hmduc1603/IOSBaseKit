@@ -46,5 +46,9 @@ let package = Package(
                 .product(name: "GoogleMobileAds", package: "swift-package-manager-google-mobile-ads", condition: .when(platforms: [.iOS])),
             ]
         ),
+        .testTarget(
+            name: "IOSBaseKitTests",
+            dependencies: ["IOSBaseKit"]
+        ),
     ]
 )
